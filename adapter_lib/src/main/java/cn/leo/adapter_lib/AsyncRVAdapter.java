@@ -3,6 +3,7 @@ package cn.leo.adapter_lib;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;
+import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.support.v7.recyclerview.extensions.AsyncDifferConfig;
 import android.support.v7.recyclerview.extensions.AsyncListDiffer;
@@ -47,7 +48,7 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
         mDiffer = new AsyncListDiffer<>(this, diffCallback);
     }
 
-    private AsyncDifferConfig<T> mConfig = new AsyncDifferConfig.Builder<T>(diffCallback).build();
+    private AsyncDifferConfig<T> mConfig = new AsyncDifferConfig.Builder<>(diffCallback).build();
 
     /**
      * 异步比对去重，areItemsTheSame相同areContentsTheSame不同的则替换位置
@@ -208,12 +209,12 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
     }
 
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new ViewHolder(parent, viewType);
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         ((ViewHolder) holder).setData(getItem(position), position);
     }
 
@@ -455,10 +456,10 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
     /**
      * 子类重写此方法获得条目内部view点击事件
      *
-     * @param view 被点击的view
+     * @param v 被点击的view
      * @param data 当前条目数据
      */
-    protected void onClickObserve(View view, T data) {
+    protected void onClickObserve(View v, T data) {
 
     }
 }
