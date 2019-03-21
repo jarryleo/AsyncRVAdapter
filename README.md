@@ -85,3 +85,15 @@ public class TestRVAdapter extends AsyncRVAdapter<TestBean> {
 }
 
 ```
+用法：  
+点击复制这个类[AsyncRVAdapter.java](https://github.com/jarryleo/AsyncRVAdapter/blob/master/adapter_lib/src/main/java/cn/leo/adapter_lib/AsyncRVAdapter.java)
+
+因为只有一个类，推荐上面用法
+
+或者依赖： 
+```
+dependencies {
+
+	       implementation 'com.github.jarryleo:AsyncRVAdapter:v1.0'
+}
+```
