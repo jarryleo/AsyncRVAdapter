@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initView() {
+
         mAdapter.setOnItemClickListener(new AsyncRVAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(AsyncRVAdapter adapter, View v, int position) {
@@ -51,6 +52,23 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "点击条目内的文本框" + item.content, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void test() {
+        AsyncRVAdapter<TestBean> adapter = new AsyncRVAdapter<TestBean>() {
+            @Override
+            protected int getItemLayout(int position) {
+                return R.layout.item_test_rv1;
+            }
+
+            @Override
+            protected void bindData(ItemHelper helper, TestBean data) {
+                helper.setText(R.id.tv_test, "测试")
+                        .setBackgroundResource(R.id.tv_test, R.drawable.ic_launcher_background)
+                        .setViewVisble(R.id.tv_test);
+            }
+        };
+        mRecyclerView.setAdapter(adapter);
     }
 
     private void initData() {

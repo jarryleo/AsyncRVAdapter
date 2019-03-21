@@ -283,7 +283,7 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
 
     public interface OnItemChildClickListener {
         /**
-         * 长按点击条目
+         * 点击条目内部的view
          *
          * @param adapter  当前适配器
          * @param v        点击的view
