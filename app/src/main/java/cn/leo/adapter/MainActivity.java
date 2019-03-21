@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -29,17 +30,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initView() {
-        mAdapter.setOnItemClickListener(new AsyncRVAdapter.OnItemClickListener<TestBean>() {
-
+        mAdapter.setOnItemClickListener(new AsyncRVAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(TestBean data, int position) {
-                Toast.makeText(MainActivity.this, data.content, Toast.LENGTH_SHORT).show();
+            public void onItemClick(AsyncRVAdapter adapter, View v, int position) {
+                TestBean item = (TestBean) adapter.getItem(position);
+                Toast.makeText(MainActivity.this, "点击条目" + item.content, Toast.LENGTH_SHORT).show();
             }
         });
-        mAdapter.setOnItemLongClickListener(new AsyncRVAdapter.OnItemLongClickListener<TestBean>() {
+        mAdapter.setOnItemLongClickListener(new AsyncRVAdapter.OnItemLongClickListener() {
             @Override
-            public void onItemLongClick(TestBean data, int position) {
-                Toast.makeText(MainActivity.this, "长按" + data.content, Toast.LENGTH_SHORT).show();
+            public void onItemLongClick(AsyncRVAdapter adapter, View v, int position) {
+                TestBean item = (TestBean) adapter.getItem(position);
+                Toast.makeText(MainActivity.this, "长按条目" + item.content, Toast.LENGTH_SHORT).show();
+            }
+        });
+        mAdapter.setOnItemChildClickListener(new AsyncRVAdapter.OnItemChildClickListener() {
+            @Override
+            public void onItemChildClick(AsyncRVAdapter adapter, View v, int position) {
+                TestBean item = (TestBean) adapter.getItem(position);
+                Toast.makeText(MainActivity.this, "点击条目内的文本框" + item.content, Toast.LENGTH_SHORT).show();
             }
         });
     }

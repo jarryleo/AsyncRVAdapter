@@ -22,26 +22,34 @@ public class TestRVAdapter extends AsyncRVAdapter<TestBean> {
 
 点击事件：      
 ```
-        mAdapter.setOnItemClickListener(new AsyncRVAdapter.OnItemClickListener<TestBean>() {
-
-            @Override
-            public void onItemClick(TestBean data, int position) {
-                Toast.makeText(MainActivity.this, data.content, Toast.LENGTH_SHORT).show();
-            }
-        });
-        mAdapter.setOnItemLongClickListener(new AsyncRVAdapter.OnItemLongClickListener<TestBean>() {
-            @Override
-            public void onItemLongClick(TestBean data, int position) {
-                Toast.makeText(MainActivity.this, "长按" + data.content, Toast.LENGTH_SHORT).show();
-            }
-        });
+         mAdapter.setOnItemClickListener(new AsyncRVAdapter.OnItemClickListener() {
+             @Override
+             public void onItemClick(AsyncRVAdapter adapter, View v, int position) {
+                 TestBean item = (TestBean) adapter.getItem(position);
+                 Toast.makeText(MainActivity.this, "点击条目" + item.content, Toast.LENGTH_SHORT).show();
+             }
+         });
+         mAdapter.setOnItemLongClickListener(new AsyncRVAdapter.OnItemLongClickListener() {
+             @Override
+             public void onItemLongClick(AsyncRVAdapter adapter, View v, int position) {
+                 TestBean item = (TestBean) adapter.getItem(position);
+                 Toast.makeText(MainActivity.this, "长按条目" + item.content, Toast.LENGTH_SHORT).show();
+             }
+         });
+         mAdapter.setOnItemChildClickListener(new AsyncRVAdapter.OnItemChildClickListener() {
+             @Override
+             public void onItemChildClick(AsyncRVAdapter adapter, View v, int position) {
+                 TestBean item = (TestBean) adapter.getItem(position);
+                 Toast.makeText(MainActivity.this, "点击条目内的文本框" + item.content, Toast.LENGTH_SHORT).show();
+             }
+         });
 ```
 
 拓展用法：   
 ```
 public class TestRVAdapter extends AsyncRVAdapter<TestBean> {
 
-    //以下两个方法用于条目判断，如果第一个相同，第二个不同，则替换老条目位置为新条目   
+    //以下两个方法用于条目判断，如果第一个相同，第二个不同，则替换
 
     @Override
     protected boolean areItemsTheSame(TestBean oldItem, TestBean newItem) {
@@ -59,27 +67,21 @@ public class TestRVAdapter extends AsyncRVAdapter<TestBean> {
     @Override
     protected int getItemLayout(int position) {
         //多条目类型
-        return position % 3 == 0 ? R.layout.item_test_rv : R.layout.item_test_rv1;
+        return position % 3 == 0 ? R.layout.item_test_rv1 : R.layout.item_test_rv;
     }
 
     @Override
     protected void bindData(ItemHelper helper, final TestBean data) {
         int layout = helper.getItemLayout();
         if (layout == R.layout.item_test_rv) {
-            helper.setText(R.id.tv_test, data.content);
-            //订阅条目内文本框点击事件
-            helper.subscribeClick(R.id.tv_test);
-        }else if (layout == R.layout.item_test_rv1){
-            helper.setText(R.id.tv_test, data.content);
-            helper.setBackgroundResource(R.id.tv_test,R.drawable.ic_launcher_background);
-        }
-    }
-
-    @Override
-    protected void onClickObserve(View v, TestBean data) {
-        if (v.getId() == R.id.tv_test) {
-            System.out.println("点击条目内文本框" + data.content);
+            helper.setText(R.id.tv_test, data.content)
+                   //订阅条目内文本框点击事件
+                  .addOnClickListener(R.id.tv_test);
+        } else if (layout == R.layout.item_test_rv1) {
+            helper.setText(R.id.tv_test, data.content)
+                  .setBackgroundResource(R.id.tv_test, R.drawable.ic_launcher_background);
         }
     }
 }
+
 ```

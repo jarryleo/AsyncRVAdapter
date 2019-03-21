@@ -27,6 +27,7 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
     private AsyncListDiffer<T> mDiffer;
     private OnItemClickListener mOnItemClickListener;
     private OnItemLongClickListener mOnItemLongClickListener;
+    private OnItemChildClickListener mOnItemChildClickListener;
     private DiffUtil.ItemCallback<T> diffCallback = new DiffUtil.ItemCallback<T>() {
 
         @Override
@@ -250,28 +251,45 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
         mOnItemClickListener = onItemClickListener;
     }
 
-    public interface OnItemClickListener<T> {
+    public interface OnItemClickListener {
         /**
          * 点击条目
          *
-         * @param data     条目数据
+         * @param adapter  当前适配器
+         * @param v        点击的view
          * @param position 条目索引
          */
-        void onItemClick(T data, int position);
+        void onItemClick(AsyncRVAdapter adapter, View v, int position);
     }
 
     public void setOnItemLongClickListener(OnItemLongClickListener onItemLongClickListener) {
         mOnItemLongClickListener = onItemLongClickListener;
     }
 
-    public interface OnItemLongClickListener<T> {
+    public interface OnItemLongClickListener {
         /**
          * 长按点击条目
          *
-         * @param data     条目数据
+         * @param adapter  当前适配器
+         * @param v        点击的view
          * @param position 条目索引
          */
-        void onItemLongClick(T data, int position);
+        void onItemLongClick(AsyncRVAdapter adapter, View v, int position);
+    }
+
+    public void setOnItemChildClickListener(OnItemChildClickListener onItemChildClickListener) {
+        mOnItemChildClickListener = onItemChildClickListener;
+    }
+
+    public interface OnItemChildClickListener {
+        /**
+         * 长按点击条目
+         *
+         * @param adapter  当前适配器
+         * @param v        点击的view
+         * @param position 条目索引
+         */
+        void onItemChildClick(AsyncRVAdapter adapter, View v, int position);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements
@@ -297,14 +315,14 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
         @Override
         public void onClick(View v) {
             if (mOnItemClickListener != null) {
-                mOnItemClickListener.onItemClick(mData, mItemHelper.getPosition());
+                mOnItemClickListener.onItemClick(AsyncRVAdapter.this, v, mItemHelper.getPosition());
             }
         }
 
         @Override
         public boolean onLongClick(View v) {
             if (mOnItemLongClickListener != null) {
-                mOnItemLongClickListener.onItemLongClick(mData, mItemHelper.getPosition());
+                mOnItemLongClickListener.onItemLongClick(AsyncRVAdapter.this, v, mItemHelper.getPosition());
                 return true;
             }
             return false;
@@ -366,7 +384,7 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
          * @param viewId 控件id
          * @param text   设置的文字
          */
-        public void setText(@IdRes int viewId, CharSequence text) {
+        public ItemHelper setText(@IdRes int viewId, CharSequence text) {
             View view = getViewById(viewId);
             if (view instanceof TextView) {
                 ((TextView) view).setText(text);
@@ -374,6 +392,7 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
                 String entryName = view.getResources().getResourceEntryName(viewId);
                 throw new ClassCastException("id: R.id." + entryName + " are not TextView");
             }
+            return this;
         }
 
         /**
@@ -382,7 +401,7 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
          * @param viewId 控件id
          * @param resId  设置的文字资源
          */
-        public void setText(@IdRes int viewId, @StringRes int resId) {
+        public ItemHelper setText(@IdRes int viewId, @StringRes int resId) {
             View view = getViewById(viewId);
             if (view instanceof TextView) {
                 ((TextView) view).setText(resId);
@@ -390,6 +409,7 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
                 String entryName = view.getResources().getResourceEntryName(viewId);
                 throw new ClassCastException("id: R.id." + entryName + " are not TextView");
             }
+            return this;
         }
 
         /**
@@ -398,7 +418,7 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
          * @param viewId 图片控件id
          * @param resId  资源id
          */
-        public void setImageResource(@IdRes int viewId, @DrawableRes int resId) {
+        public ItemHelper setImageResource(@IdRes int viewId, @DrawableRes int resId) {
             View view = getViewById(viewId);
             if (view instanceof ImageView) {
                 ((ImageView) view).setImageResource(resId);
@@ -406,6 +426,7 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
                 String entryName = view.getResources().getResourceEntryName(viewId);
                 throw new ClassCastException("id: R.id." + entryName + " are not ImageView");
             }
+            return this;
         }
 
         /**
@@ -414,52 +435,56 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
          * @param viewId 控件id
          * @param resId  资源id
          */
-        public void setBackgroundResource(@IdRes int viewId, @DrawableRes int resId) {
+        public ItemHelper setBackgroundResource(@IdRes int viewId, @DrawableRes int resId) {
             View view = getViewById(viewId);
             view.setBackgroundResource(resId);
+            return this;
         }
 
-        public void setViewVisble(@IdRes int viewId) {
+
+        public ItemHelper setVisibility(@IdRes int viewId, int visibility) {
+            View view = getViewById(viewId);
+            view.setVisibility(visibility);
+            return this;
+        }
+
+        public ItemHelper setViewVisble(@IdRes int viewId) {
             View view = getViewById(viewId);
             view.setVisibility(View.VISIBLE);
+            return this;
         }
 
-        public void setViewInvisble(@IdRes int viewId) {
+        public ItemHelper setViewInvisble(@IdRes int viewId) {
             View view = getViewById(viewId);
             view.setVisibility(View.INVISIBLE);
+            return this;
         }
 
-        public void setViewGone(@IdRes int viewId) {
+        public ItemHelper setViewGone(@IdRes int viewId) {
             View view = getViewById(viewId);
             view.setVisibility(View.GONE);
+            return this;
         }
 
         /**
-         * 给条目中的view订阅点击事件
+         * 给条目中的view添加点击事件
          *
          * @param viewId 控件id
          */
-        public void subscribeClick(@IdRes int viewId) {
+        public ItemHelper addOnClickListener(@IdRes int viewId) {
             boolean contains = clickListenerCache.contains(viewId);
             if (!contains) {
                 getViewById(viewId).setOnClickListener(this);
                 clickListenerCache.add(viewId);
             }
+            return this;
         }
 
         @Override
         public void onClick(View v) {
-            onClickObserve(v, getItem(mPosition));
+            if (mOnItemChildClickListener != null) {
+                mOnItemChildClickListener.onItemChildClick(AsyncRVAdapter.this, v, mPosition);
+            }
         }
-    }
-
-    /**
-     * 子类重写此方法获得条目内部view点击事件
-     *
-     * @param v 被点击的view
-     * @param data 当前条目数据
-     */
-    protected void onClickObserve(View v, T data) {
-
     }
 }

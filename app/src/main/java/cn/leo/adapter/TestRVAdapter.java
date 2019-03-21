@@ -1,8 +1,6 @@
 package cn.leo.adapter;
 
 
-import android.view.View;
-
 import cn.leo.adapter_lib.AsyncRVAdapter;
 
 /**
@@ -29,26 +27,19 @@ public class TestRVAdapter extends AsyncRVAdapter<TestBean> {
     @Override
     protected int getItemLayout(int position) {
         //多条目类型
-        return position % 3 == 0 ? R.layout.item_test_rv : R.layout.item_test_rv1;
+        return position % 3 == 0 ? R.layout.item_test_rv1 : R.layout.item_test_rv;
     }
 
     @Override
     protected void bindData(ItemHelper helper, final TestBean data) {
         int layout = helper.getItemLayout();
         if (layout == R.layout.item_test_rv) {
-            helper.setText(R.id.tv_test, data.content);
+            helper.setText(R.id.tv_test, data.content)
             //订阅条目内文本框点击事件
-            helper.subscribeClick(R.id.tv_test);
-        }else if (layout == R.layout.item_test_rv1){
-            helper.setText(R.id.tv_test, data.content);
-            helper.setBackgroundResource(R.id.tv_test,R.drawable.ic_launcher_background);
-        }
-    }
-
-    @Override
-    protected void onClickObserve(View v, TestBean data) {
-        if (v.getId() == R.id.tv_test) {
-            System.out.println("点击条目内文本框" + data.content);
+            .addOnClickListener(R.id.tv_test);
+        } else if (layout == R.layout.item_test_rv1) {
+            helper.setText(R.id.tv_test, data.content)
+                  .setBackgroundResource(R.id.tv_test, R.drawable.ic_launcher_background);
         }
     }
 }
