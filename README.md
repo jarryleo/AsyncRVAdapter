@@ -90,10 +90,3 @@ public class TestRVAdapter extends AsyncRVAdapter<TestBean> {
 
 因为只有一个类，推荐上面用法
 
-或者依赖： 
-```
-dependencies {
-
-	       implementation 'com.github.jarryleo:AsyncRVAdapter:v1.0'
-}
-```
