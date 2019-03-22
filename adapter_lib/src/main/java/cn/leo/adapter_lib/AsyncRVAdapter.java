@@ -216,7 +216,7 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        ((ViewHolder) holder).setData(getItem(position), position);
+        ((ViewHolder) holder).setData(position);
     }
 
     @Override
@@ -295,7 +295,6 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
     public class ViewHolder extends RecyclerView.ViewHolder implements
             View.OnClickListener, View.OnLongClickListener {
         private final ItemHelper mItemHelper;
-        private T mData;
 
         private ViewHolder(ViewGroup parent, int layout) {
             super(LayoutInflater.from(parent.getContext())
@@ -306,10 +305,9 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
             itemView.setOnLongClickListener(this);
         }
 
-        private void setData(T data, int position) {
-            mData = data;
+        private void setData(int position) {
             mItemHelper.setPosition(position);
-            bindData(mItemHelper, data);
+            bindData(mItemHelper, getItem(position));
         }
 
         @Override

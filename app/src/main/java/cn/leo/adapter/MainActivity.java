@@ -12,6 +12,9 @@ import java.util.List;
 
 import cn.leo.adapter_lib.AsyncRVAdapter;
 
+/**
+ * @author Leo
+ */
 public class MainActivity extends AppCompatActivity {
 
     private RecyclerView mRecyclerView;
@@ -30,45 +33,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initView() {
-
-        mAdapter.setOnItemClickListener(new AsyncRVAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(AsyncRVAdapter adapter, View v, int position) {
-                TestBean item = (TestBean) adapter.getItem(position);
-                Toast.makeText(MainActivity.this, "点击条目" + item.content, Toast.LENGTH_SHORT).show();
-            }
+        mAdapter.setOnItemClickListener((adapter, v, position) -> {
+            TestBean item = (TestBean) adapter.getItem(position);
+            Toast.makeText(MainActivity.this, "点击条目" + item.content, Toast.LENGTH_SHORT).show();
         });
-        mAdapter.setOnItemLongClickListener(new AsyncRVAdapter.OnItemLongClickListener() {
-            @Override
-            public void onItemLongClick(AsyncRVAdapter adapter, View v, int position) {
-                TestBean item = (TestBean) adapter.getItem(position);
-                Toast.makeText(MainActivity.this, "长按条目" + item.content, Toast.LENGTH_SHORT).show();
-            }
+        mAdapter.setOnItemLongClickListener((adapter, v, position) -> {
+            TestBean item = (TestBean) adapter.getItem(position);
+            Toast.makeText(MainActivity.this, "长按条目" + item.content, Toast.LENGTH_SHORT).show();
         });
-        mAdapter.setOnItemChildClickListener(new AsyncRVAdapter.OnItemChildClickListener() {
-            @Override
-            public void onItemChildClick(AsyncRVAdapter adapter, View v, int position) {
-                TestBean item = (TestBean) adapter.getItem(position);
-                Toast.makeText(MainActivity.this, "点击条目内的文本框" + item.content, Toast.LENGTH_SHORT).show();
-            }
+        mAdapter.setOnItemChildClickListener((adapter, v, position) -> {
+            TestBean item = (TestBean) adapter.getItem(position);
+            Toast.makeText(MainActivity.this, "点击条目内的文本框" + item.content, Toast.LENGTH_SHORT).show();
         });
-    }
-
-    private void test() {
-        AsyncRVAdapter<TestBean> adapter = new AsyncRVAdapter<TestBean>() {
-            @Override
-            protected int getItemLayout(int position) {
-                return R.layout.item_test_rv1;
-            }
-
-            @Override
-            protected void bindData(ItemHelper helper, TestBean data) {
-                helper.setText(R.id.tv_test, "测试")
-                        .setBackgroundResource(R.id.tv_test, R.drawable.ic_launcher_background)
-                        .setViewVisble(R.id.tv_test);
-            }
-        };
-        mRecyclerView.setAdapter(adapter);
     }
 
     private void initData() {
