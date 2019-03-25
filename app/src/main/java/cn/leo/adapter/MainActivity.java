@@ -4,13 +4,10 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.View;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import cn.leo.adapter_lib.AsyncRVAdapter;
 
 /**
  * @author Leo
@@ -18,7 +15,7 @@ import cn.leo.adapter_lib.AsyncRVAdapter;
 public class MainActivity extends AppCompatActivity {
 
     private RecyclerView mRecyclerView;
-    private TestRVAdapter mAdapter;
+    private TestRVAdapterKt mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mRecyclerView = findViewById(R.id.rvTest);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        mAdapter = new TestRVAdapter();
+        mAdapter = new TestRVAdapterKt();
         mRecyclerView.setAdapter(mAdapter);
         initView();
         initData();
@@ -55,6 +52,6 @@ public class MainActivity extends AppCompatActivity {
             e.content = "测试条目" + i;
             list.add(e);
         }
-        mAdapter.setData(list);
+        mAdapter.setMutableList(list);
     }
 }
