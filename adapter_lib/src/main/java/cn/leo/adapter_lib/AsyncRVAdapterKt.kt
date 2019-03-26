@@ -43,7 +43,7 @@ abstract class AsyncRVAdapterKt<T> : RecyclerView.Adapter<RecyclerView.ViewHolde
     /**
      * 设置新的数据集
      */
-    var mutableList: MutableList<T>
+    var data: MutableList<T>
         get() = mDiffer.currentList
         set(data) = mDiffer.submitList(data)
 
@@ -87,11 +87,11 @@ abstract class AsyncRVAdapterKt<T> : RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     private fun asyncAddData(data: MutableList<T>) {
-        asyncAddData(mutableList, data)
+        asyncAddData(this.data, data)
     }
 
     private fun asyncAddData(data: T) {
-        asyncAddData(mutableList, listOf(data))
+        asyncAddData(this.data, listOf(data))
     }
 
     /**
@@ -121,8 +121,8 @@ abstract class AsyncRVAdapterKt<T> : RecyclerView.Adapter<RecyclerView.ViewHolde
         if (position < 0 || position >= mDiffer.currentList.size) {
             return
         }
-        mutableList.removeAt(position)
-        mDiffer.submitList(mutableList)
+        this.data.removeAt(position)
+        mDiffer.submitList(this.data)
     }
 
     /**
@@ -134,8 +134,8 @@ abstract class AsyncRVAdapterKt<T> : RecyclerView.Adapter<RecyclerView.ViewHolde
      * @see AsyncRVAdapterKt.areContentsTheSame
      */
     fun removeData(data: T) {
-        mutableList.remove(data)
-        mDiffer.submitList(mutableList)
+        this.data.remove(data)
+        mDiffer.submitList(this.data)
     }
 
     /**

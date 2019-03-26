@@ -52,6 +52,6 @@ public class MainActivity extends AppCompatActivity {
             e.content = "测试条目" + i;
             list.add(e);
         }
-        mAdapter.setMutableList(list);
+        mAdapter.setData(list);
     }
 }
