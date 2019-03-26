@@ -61,7 +61,7 @@ public class TestRVAdapter extends AsyncRVAdapter<TestBean> {
 ```
 public class TestRVAdapter extends AsyncRVAdapter<TestBean> {
 
-    //以下两个方法用于条目判断，如果第一个相同，第二个不同，则替换
+    //以下两个方法用于条目判断，如果第一个相同，第二个不同，则替换条目，都相同则去重
 
     @Override
     protected boolean areItemsTheSame(TestBean oldItem, TestBean newItem) {
@@ -87,7 +87,7 @@ public class TestRVAdapter extends AsyncRVAdapter<TestBean> {
         int layout = helper.getItemLayout();
         if (layout == R.layout.item_test_rv) {
             helper.setText(R.id.tv_test, data.content)
-                   //订阅条目内文本框点击事件
+                   //订阅条目内文本框点击事件（对应上面的条目内控件点击事件）
                   .addOnClickListener(R.id.tv_test);
         } else if (layout == R.layout.item_test_rv1) {
             helper.setText(R.id.tv_test, data.content)
