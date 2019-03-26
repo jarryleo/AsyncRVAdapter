@@ -14,7 +14,7 @@
 - 多个数据源不太好处理
 
 注意:
-> 需要依赖版本 com.android.support:appcompat-v7:27.1.0 及以上
+> 需要依赖版本com.android.support:recyclerview-v7:27.1.0 及以上
 
 最简用法：
 ```
