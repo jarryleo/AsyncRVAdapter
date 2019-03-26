@@ -1,9 +1,20 @@
 # AsyncRVAdapter
 极简封装使用的RecyclerView的adapter
 
-继承本adapter不需要holder，
-高性能高复用，最符合官方用法。  
-所有数据操作均是异步操作，可以在子线程操作数据！
+优点：
+- 采用官方的AsyncListDiffer实现数据处理，保证性能
+- 最少只需要实现2个方法，不需要holder
+- 高性能，高复用，view id复用，点击事件复用。
+- 所有数据操作异步执行，可以在子线程操作数据更新UI ，注意不需要使用notifyDataSetChanged方法！
+- 内置异步去重功能，需要2个重写条目判断方法
+- 条目布局绑定数据可以链式调用，书写优雅
+
+缺点:
+- 如果条目类型过多或者复杂容易导致bindData方法过于臃肿
+- 多个数据源不太好处理
+
+注意:
+> 需要依赖版本 com.android.support:appcompat-v7:27.1.0 及以上
 
 最简用法：
 ```
