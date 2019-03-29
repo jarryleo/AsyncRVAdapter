@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 
 /**
  * @author : Jarry Leo
@@ -21,6 +22,8 @@ public class StatePager {
     private int mLoadingId = View.NO_ID;
     private int mEmptyId = View.NO_ID;
     private int mErrorId = View.NO_ID;
+    private int mClickId = View.NO_ID;
+    private View.OnClickListener mOnClickListener;
 
     private StatePager(View view) {
         mView = view;
@@ -74,13 +77,29 @@ public class StatePager {
     }
 
     public StatePager setRetryButtonId(@IdRes int id) {
-
+        mClickId = id;
         return this;
     }
 
     public StatePager setRetryClickListener(View.OnClickListener listener) {
-
+        mOnClickListener = listener;
         return this;
+    }
+
+    public void showLoading() {
+        replaceView(mLoadingId);
+    }
+
+    public void showEmpty() {
+        replaceView(mLoadingId);
+    }
+
+    public void showError() {
+        replaceView(mLoadingId);
+        View clickView = getViewById(mReplace, mClickId);
+        if (clickView != null) {
+            clickView.setOnClickListener(mOnClickListener);
+        }
     }
 
     /**
@@ -100,19 +119,25 @@ public class StatePager {
         return view.findViewById(viewId);
     }
 
-    private void repalceView(int layoutRes) {
+    private void replaceView(int layoutRes) {
         if (mReplace != null) {
             int id = mReplace.getId();
             if (id == layoutRes) {
                 return;
             }
         }
-        ViewGroup parent = (ViewGroup) mView.getParent();
+        ViewGroup parent = (ViewGroup) mTarget.getParent();
         parent.removeView(mReplace);
         View inflate = LayoutInflater.from(mContext).inflate(layoutRes, null);
         inflate.setLayoutParams(mView.getLayoutParams());
         inflate.setId(layoutRes);
         mReplace = inflate;
-
+        int index = parent.indexOfChild(mTarget);
+        parent.addView(mReplace, index);
+        if (parent instanceof RelativeLayout) {
+            mTarget.setVisibility(View.INVISIBLE);
+        } else {
+            mTarget.setVisibility(View.GONE);
+        }
     }
 }
