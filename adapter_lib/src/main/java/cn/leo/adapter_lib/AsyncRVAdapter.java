@@ -145,11 +145,9 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
 
     /**
      * 根据对象移除条目
-     * 只需要对象满足下面2个条件即可删除
+     * 对象必须重写equals
      *
      * @param data 条目对象
-     * @see AsyncRVAdapter#areItemsTheSame(Object, Object)
-     * @see AsyncRVAdapter#areContentsTheSame(Object, Object)
      */
     public void removeData(T data) {
         List<T> list = getData();

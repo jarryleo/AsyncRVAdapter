@@ -127,11 +127,9 @@ abstract class AsyncRVAdapterKt<T> : RecyclerView.Adapter<RecyclerView.ViewHolde
 
     /**
      * 根据对象移除条目
-     * 只需要对象满足下面2个条件即可删除
+     * 对象必须重写equals
      *
      * @param data 条目对象
-     * @see AsyncRVAdapterKt.areItemsTheSame
-     * @see AsyncRVAdapterKt.areContentsTheSame
      */
     fun removeData(data: T) {
         this.data.remove(data)
@@ -302,6 +300,7 @@ abstract class AsyncRVAdapterKt<T> : RecyclerView.Adapter<RecyclerView.ViewHolde
             this.itemLayout = layoutResId
         }
 
+        @Suppress("UNCHECKED_CAST")
         fun <V : View> getViewById(@IdRes viewId: Int): V {
             val v = viewCache.get(viewId)
             val view: V?
