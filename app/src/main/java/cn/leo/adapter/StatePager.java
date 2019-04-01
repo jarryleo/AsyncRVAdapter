@@ -25,6 +25,9 @@ public class StatePager {
         mBuilder = builder;
     }
 
+    /**
+     * 传入要替换展示状态的view
+     */
     public static Builder builder(@NonNull View replaceView) {
         return new Builder(replaceView);
     }
