@@ -1,12 +1,10 @@
 package cn.leo.adapter;
 
-import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,31 +25,12 @@ public class StatePager {
         mBuilder = builder;
     }
 
-    public static Builder builder(@NonNull View view) {
-        return new Builder(view);
-    }
-
-    public static Builder builder(@NonNull Activity activity) {
-        return new Builder(activity.getWindow().getDecorView());
-    }
-
-    public static Builder builder(@NonNull Fragment fragment) {
-        if (fragment.getView() == null) {
-            throw new NullPointerException("fragment not attach");
-        }
-        return new Builder(fragment.getView());
-    }
-
-    public static Builder builder(@NonNull android.app.Fragment fragment) {
-        if (fragment.getView() == null) {
-            throw new NullPointerException("fragment not attach");
-        }
-        return new Builder(fragment.getView());
+    public static Builder builder(@NonNull View replaceView) {
+        return new Builder(replaceView);
     }
 
     public static class Builder {
         private Context mContext;
-        private View mView;
         private View mTarget;
         private View mReplace;
         private int mLoadingId = View.NO_ID;
@@ -62,8 +41,9 @@ public class StatePager {
         private boolean mIsRelative;
 
         private Builder(View view) {
-            mView = view;
+            mTarget = view;
             mContext = view.getContext();
+            initSuccessView();
         }
 
 
@@ -71,11 +51,18 @@ public class StatePager {
          * 替代view位置展示不同状态page
          * 如果view 的父view 是
          */
-        public Builder successViewId(@IdRes int id) {
-            mTarget = getViewById(id);
+        private void initSuccessView() {
             ViewGroup parent = (ViewGroup) mTarget.getParent();
             mIsRelative = (parent instanceof RelativeLayout ||
                     parent instanceof ConstraintLayout);
+            if (parent == null) {
+                if (mTarget instanceof ViewGroup) {
+                    parent = (ViewGroup) mTarget;
+                    mTarget = parent.getChildAt(0);
+                } else {
+                    return;
+                }
+            }
             if (!mIsRelative) {
                 FrameLayout frameLayout = new FrameLayout(mContext);
                 frameLayout.setLayoutParams(mTarget.getLayoutParams());
@@ -84,7 +71,6 @@ public class StatePager {
                 frameLayout.addView(mTarget);
                 parent.addView(frameLayout, index);
             }
-            return this;
         }
 
         /**
@@ -127,22 +113,7 @@ public class StatePager {
             return this;
         }
 
-        /**
-         * 根据id查找view
-         */
-        private View getViewById(@IdRes int viewId) {
-            View view = mView.findViewById(viewId);
-            if (view == null) {
-                String entryName = mView.getResources().getResourceEntryName(viewId);
-                throw new NullPointerException("id: R.id." + entryName + " can not find in this view!");
-            }
-            return view;
-        }
-
         public StatePager build() {
-            if (mTarget == null) {
-                throw new NullPointerException("successViewId must be set!");
-            }
             return new StatePager(this);
         }
     }

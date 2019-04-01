@@ -40,7 +40,6 @@ public class TestRVAdapter extends AsyncRVAdapter<TestBean> {
             StatePager pager = (StatePager) helper.getTag();
             if (pager == null) {
                 pager = StatePager.builder(helper.getItemView())
-                        .successViewId(R.id.tv_test)
                         .emptyViewLayout(R.layout.pager_empty)
                         .build();
                 helper.setTag(pager);

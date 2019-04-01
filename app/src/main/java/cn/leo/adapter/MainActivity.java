@@ -33,8 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initView() {
 
-        mStatePager = StatePager.builder(this)
-                .successViewId(R.id.rvTest)
+        mStatePager = StatePager.builder(mRecyclerView)
                 .loadingViewLayout(R.layout.pager_loading)
                 .emptyViewLayout(R.layout.pager_empty)
                 .errorViewLayout(R.layout.pager_error)
