@@ -122,7 +122,7 @@ public class StatePager {
 
         public StatePager build() {
             if (mTarget == null) {
-                throw new NullPointerException("successViewId must set!");
+                throw new NullPointerException("successViewId must be set!");
             }
             return new StatePager(this);
         }
