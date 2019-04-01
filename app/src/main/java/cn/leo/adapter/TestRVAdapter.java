@@ -35,11 +35,20 @@ public class TestRVAdapter extends AsyncRVAdapter<TestBean> {
         int layout = helper.getItemLayout();
         if (layout == R.layout.item_test_rv) {
             helper.setText(R.id.tv_test, data.content)
-            //订阅条目内文本框点击事件
-            .addOnClickListener(R.id.tv_test);
+                    //订阅条目内文本框点击事件
+                    .addOnClickListener(R.id.tv_test);
+            StatePager pager = (StatePager) helper.getTag();
+            if (pager == null) {
+                pager = StatePager.builder(helper.getItemView())
+                        .successViewId(R.id.tv_test)
+                        .emptyViewLayout(R.layout.pager_empty)
+                        .build();
+                helper.setTag(pager);
+            }
+            pager.showEmpty();
         } else if (layout == R.layout.item_test_rv1) {
             helper.setText(R.id.tv_test, data.content)
-                  .setBackgroundResource(R.id.tv_test, R.drawable.ic_launcher_background);
+                    .setBackgroundResource(R.id.tv_test, R.drawable.ic_launcher_background);
         }
     }
 }

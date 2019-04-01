@@ -332,6 +332,10 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
         private @LayoutRes
         int layoutResId;
         private int mPosition;
+        /**
+         * 携带额外绑定数据便于复用
+         */
+        private Object tag;
 
         public ItemHelper(View itemView) {
             this.itemView = itemView;
@@ -356,6 +360,14 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
 
         public View getItemView() {
             return itemView;
+        }
+
+        public Object getTag() {
+            return tag;
+        }
+
+        public void setTag(Object tag) {
+            this.tag = tag;
         }
 
         public final <V extends View> V getViewById(@IdRes int viewId) {
