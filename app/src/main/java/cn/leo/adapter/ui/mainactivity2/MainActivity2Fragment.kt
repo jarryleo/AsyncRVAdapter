@@ -26,10 +26,14 @@ class MainActivity2Fragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProviders.of(this).get(MainActivity2ViewModel::class.java)
-        // TODO: Use the ViewModel
+        viewModel.getUsers().observeForever {
+            message.text = it!!.name
+        }
 
         val build = StatePager.builder(message)
                 .emptyViewLayout(R.layout.pager_empty)
+                .addRetryButtonId(R.id.tv_tips)
+                .setRetryClickListener { statePager, _ -> statePager.showSuccess() }
                 .build()
 
         build.showEmpty()

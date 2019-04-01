@@ -22,7 +22,7 @@ import java.util.List;
  * @author : Jarry Leo
  * @date : 2019/3/29 14:01
  */
-public class StatePager {
+public class StatePager implements View.OnClickListener {
     private Builder mBuilder;
 
     private StatePager(Builder builder) {
@@ -44,7 +44,7 @@ public class StatePager {
         private int mEmptyId = View.NO_ID;
         private int mErrorId = View.NO_ID;
         private List<Integer> mClickIds;
-        private View.OnClickListener mOnClickListener;
+        private OnClickListener mOnClickListener;
         private boolean mIsRelative;
 
         private Builder(View view) {
@@ -115,7 +115,7 @@ public class StatePager {
             return this;
         }
 
-        public Builder setRetryClickListener(View.OnClickListener listener) {
+        public Builder setRetryClickListener(OnClickListener listener) {
             mOnClickListener = listener;
             return this;
         }
@@ -169,9 +169,14 @@ public class StatePager {
         for (Integer clickId : mBuilder.mClickIds) {
             View clickView = getViewById(mBuilder.mReplace, clickId);
             if (clickView != null) {
-                clickView.setOnClickListener(mBuilder.mOnClickListener);
+                clickView.setOnClickListener(this);
             }
         }
+    }
+
+    @Override
+    public void onClick(View v) {
+        mBuilder.mOnClickListener.onClick(this, v);
     }
 
     private View getViewById(@NonNull View view, @IdRes int viewId) {
@@ -201,6 +206,11 @@ public class StatePager {
         }
         mBuilder.mReplace.setVisibility(View.VISIBLE);
     }
+
+    public interface OnClickListener {
+        void onClick(StatePager statePager, View v);
+    }
+
 
     public static class ViewHelper {
         private View mView;

@@ -33,20 +33,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initView() {
-
         mStatePager = StatePager.builder(mRecyclerView)
                 .loadingViewLayout(R.layout.pager_loading)
                 .emptyViewLayout(R.layout.pager_empty)
                 .errorViewLayout(R.layout.pager_error)
                 .addRetryButtonId(R.id.tv_tips)
                 .addRetryButtonId(R.id.btn_retry)
-                .setRetryClickListener(new View.OnClickListener() {
+                .setRetryClickListener(new StatePager.OnClickListener() {
                     @Override
-                    public void onClick(View v) {
+                    public void onClick(StatePager statePager, View v) {
                         if (v.getId() == R.id.btn_retry) {
-                            mStatePager.showSuccess();
+                            statePager.showSuccess();
                         } else {
-                            mStatePager.showError()
+                            statePager.showError()
                                     .setText(R.id.btn_retry, "哦哦，失败了，点击重试一下？");
                         }
                     }
