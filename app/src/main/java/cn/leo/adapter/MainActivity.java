@@ -45,18 +45,21 @@ public class MainActivity extends AppCompatActivity {
                         if (v.getId() == R.id.btn_retry) {
                             mStatePager.showSuccess();
                         } else {
-                            mStatePager.showError();
+                            mStatePager.showError()
+                                    .setText(R.id.btn_retry, "哦哦，失败了，点击重试一下？");
                         }
                     }
                 })
                 .build();
 
-        mStatePager.showLoading();
+        mStatePager.showLoading()
+                .setText(R.id.tv_tips, "正在使出吃奶的力气加载");
 
         new SafetyMainHandler(this).postDelayed(new Runnable() {
             @Override
             public void run() {
-                mStatePager.showEmpty();
+                mStatePager.showEmpty()
+                        .setText(R.id.tv_tips, "这里没有发现数据");
             }
         }, 2000);
 

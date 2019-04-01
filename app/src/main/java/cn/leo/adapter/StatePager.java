@@ -1,15 +1,19 @@
 package cn.leo.adapter;
 
 import android.content.Context;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
 import android.support.constraint.ConstraintLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -121,31 +125,31 @@ public class StatePager {
         }
     }
 
-    public View showLoading() {
+    public ViewHelper showLoading() {
         if (mBuilder.mLoadingId == View.NO_ID) {
             throw new NullPointerException("loading layout is invalid");
         }
         replaceView(mBuilder.mLoadingId);
         setClick();
-        return mBuilder.mReplace;
+        return new ViewHelper(mBuilder.mReplace);
     }
 
-    public View showEmpty() {
+    public ViewHelper showEmpty() {
         if (mBuilder.mEmptyId == View.NO_ID) {
             throw new NullPointerException("empty layout is invalid");
         }
         replaceView(mBuilder.mEmptyId);
         setClick();
-        return mBuilder.mReplace;
+        return new ViewHelper(mBuilder.mReplace);
     }
 
-    public View showError() {
+    public ViewHelper showError() {
         if (mBuilder.mErrorId == View.NO_ID) {
             throw new NullPointerException("error layout is invalid");
         }
         replaceView(mBuilder.mErrorId);
         setClick();
-        return mBuilder.mReplace;
+        return new ViewHelper(mBuilder.mReplace);
     }
 
     public void showSuccess() {
@@ -194,6 +198,117 @@ public class StatePager {
             mBuilder.mTarget.setVisibility(View.INVISIBLE);
         } else {
             mBuilder.mTarget.setVisibility(View.GONE);
+        }
+    }
+
+    public static class ViewHelper {
+        private View mView;
+
+        public ViewHelper(View view) {
+            mView = view;
+        }
+
+        public final <V extends View> V findViewById(@IdRes int viewId) {
+            V view = mView.findViewById(viewId);
+            if (view == null) {
+                String entryName = mView.getResources().getResourceEntryName(viewId);
+                throw new NullPointerException("id: R.id." + entryName + " can not find in this item!");
+            }
+            return view;
+        }
+
+        /**
+         * 给按钮或文本框设置文字
+         *
+         * @param viewId 控件id
+         * @param text   设置的文字
+         */
+        public ViewHelper setText(@IdRes int viewId, CharSequence text) {
+            View view = findViewById(viewId);
+            if (view instanceof TextView) {
+                ((TextView) view).setText(text);
+            } else {
+                String entryName = view.getResources().getResourceEntryName(viewId);
+                throw new ClassCastException("id: R.id." + entryName + " are not TextView");
+            }
+            return this;
+        }
+
+        /**
+         * 给按钮或文本框设置文字
+         *
+         * @param viewId 控件id
+         * @param resId  设置的文字资源
+         */
+        public ViewHelper setText(@IdRes int viewId, @StringRes int resId) {
+            View view = findViewById(viewId);
+            if (view instanceof TextView) {
+                ((TextView) view).setText(resId);
+            } else {
+                String entryName = view.getResources().getResourceEntryName(viewId);
+                throw new ClassCastException("id: R.id." + entryName + " are not TextView");
+            }
+            return this;
+        }
+
+        /**
+         * 给图片控件设置资源图片
+         *
+         * @param viewId 图片控件id
+         * @param resId  资源id
+         */
+        public ViewHelper setImageResource(@IdRes int viewId, @DrawableRes int resId) {
+            View view = findViewById(viewId);
+            if (view instanceof ImageView) {
+                ((ImageView) view).setImageResource(resId);
+            } else {
+                String entryName = view.getResources().getResourceEntryName(viewId);
+                throw new ClassCastException("id: R.id." + entryName + " are not ImageView");
+            }
+            return this;
+        }
+
+        /**
+         * 设置view的背景
+         *
+         * @param viewId 控件id
+         * @param resId  资源id
+         */
+        public ViewHelper setBackgroundResource(@IdRes int viewId, @DrawableRes int resId) {
+            View view = findViewById(viewId);
+            view.setBackgroundResource(resId);
+            return this;
+        }
+
+
+        public ViewHelper setVisibility(@IdRes int viewId, int visibility) {
+            View view = findViewById(viewId);
+            view.setVisibility(visibility);
+            return this;
+        }
+
+        public ViewHelper setViewVisble(@IdRes int viewId) {
+            View view = findViewById(viewId);
+            view.setVisibility(View.VISIBLE);
+            return this;
+        }
+
+        public ViewHelper setViewInvisble(@IdRes int viewId) {
+            View view = findViewById(viewId);
+            view.setVisibility(View.INVISIBLE);
+            return this;
+        }
+
+        public ViewHelper setViewGone(@IdRes int viewId) {
+            View view = findViewById(viewId);
+            view.setVisibility(View.GONE);
+            return this;
+        }
+
+        public ViewHelper setOnClickListener(@IdRes int viewId, View.OnClickListener onClickListener) {
+            View view = findViewById(viewId);
+            view.setOnClickListener(onClickListener);
+            return this;
         }
     }
 }
