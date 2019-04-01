@@ -10,7 +10,11 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author : Jarry Leo
@@ -53,8 +57,9 @@ public class StatePager {
         private int mLoadingId = View.NO_ID;
         private int mEmptyId = View.NO_ID;
         private int mErrorId = View.NO_ID;
-        private int mClickId = View.NO_ID;
+        private List<Integer> mClickIds;
         private View.OnClickListener mOnClickListener;
+        private boolean mIsRelative;
 
         private Builder(View view) {
             mView = view;
@@ -68,6 +73,17 @@ public class StatePager {
          */
         public Builder successViewId(@IdRes int id) {
             mTarget = getViewById(id);
+            ViewGroup parent = (ViewGroup) mTarget.getParent();
+            mIsRelative = (parent instanceof RelativeLayout ||
+                    parent instanceof ConstraintLayout);
+            if (!mIsRelative) {
+                FrameLayout frameLayout = new FrameLayout(mContext);
+                frameLayout.setLayoutParams(mTarget.getLayoutParams());
+                int index = parent.indexOfChild(mTarget);
+                parent.removeView(mTarget);
+                frameLayout.addView(mTarget);
+                parent.addView(frameLayout, index);
+            }
             return this;
         }
 
@@ -98,8 +114,11 @@ public class StatePager {
         /**
          * 重试按钮id
          */
-        public Builder setRetryButtonId(@IdRes int id) {
-            mClickId = id;
+        public Builder addRetryButtonId(@IdRes int id) {
+            if (mClickIds == null) {
+                mClickIds = new ArrayList<>();
+            }
+            mClickIds.add(id);
             return this;
         }
 
@@ -158,16 +177,22 @@ public class StatePager {
     public void showSuccess() {
         mBuilder.mTarget.setVisibility(View.VISIBLE);
         mBuilder.mReplace.setVisibility(View.GONE);
+        ViewGroup parent = (ViewGroup) mBuilder.mTarget.getParent();
+        parent.removeView(mBuilder.mReplace);
         mBuilder.mReplace = null;
     }
 
     private void setClick() {
-        View clickView = getViewById(mBuilder.mReplace, mBuilder.mClickId);
-        if (clickView != null) {
-            clickView.setOnClickListener(mBuilder.mOnClickListener);
+        if (mBuilder.mClickIds == null) {
+            return;
+        }
+        for (Integer clickId : mBuilder.mClickIds) {
+            View clickView = getViewById(mBuilder.mReplace, clickId);
+            if (clickView != null) {
+                clickView.setOnClickListener(mBuilder.mOnClickListener);
+            }
         }
     }
-
 
     private View getViewById(@NonNull View view, @IdRes int viewId) {
         return view.findViewById(viewId);
@@ -191,8 +216,7 @@ public class StatePager {
         mBuilder.mReplace = inflate;
         int index = parent.indexOfChild(mBuilder.mTarget);
         parent.addView(mBuilder.mReplace, index);
-        if (parent instanceof RelativeLayout ||
-                parent instanceof ConstraintLayout) {
+        if (mBuilder.mIsRelative) {
             mBuilder.mTarget.setVisibility(View.INVISIBLE);
         } else {
             mBuilder.mTarget.setVisibility(View.GONE);

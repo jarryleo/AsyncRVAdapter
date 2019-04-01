@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main1);
         mRecyclerView = findViewById(R.id.rvTest);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         mAdapter = new TestRVAdapter();
@@ -38,11 +38,16 @@ public class MainActivity extends AppCompatActivity {
                 .loadingViewLayout(R.layout.pager_loading)
                 .emptyViewLayout(R.layout.pager_empty)
                 .errorViewLayout(R.layout.pager_error)
-                .setRetryButtonId(R.id.tv_tips)
+                .addRetryButtonId(R.id.tv_tips)
+                .addRetryButtonId(R.id.btn_retry)
                 .setRetryClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        mStatePager.showSuccess();
+                        if (v.getId() == R.id.btn_retry) {
+                            mStatePager.showSuccess();
+                        } else {
+                            mStatePager.showError();
+                        }
                     }
                 })
                 .build();
@@ -52,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
         new SafetyMainHandler(this).postDelayed(new Runnable() {
             @Override
             public void run() {
-                mStatePager.showError();
+                mStatePager.showEmpty();
             }
         }, 2000);
 
