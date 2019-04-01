@@ -1,5 +1,6 @@
 package cn.leo.adapter;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -63,6 +64,12 @@ public class MainActivity extends AppCompatActivity {
             }
         }, 2000);
 
+        findViewById(R.id.btnTest).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, MainActivity2.class));
+            }
+        });
 
         mAdapter.setOnItemClickListener((adapter, v, position) -> {
             TestBean item = (TestBean) adapter.getItem(position);

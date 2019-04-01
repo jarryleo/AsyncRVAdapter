@@ -154,10 +154,12 @@ public class StatePager {
 
     public void showSuccess() {
         mBuilder.mTarget.setVisibility(View.VISIBLE);
-        mBuilder.mReplace.setVisibility(View.GONE);
-        ViewGroup parent = (ViewGroup) mBuilder.mTarget.getParent();
-        parent.removeView(mBuilder.mReplace);
-        mBuilder.mReplace = null;
+        if (mBuilder.mReplace != null) {
+            mBuilder.mReplace.setVisibility(View.GONE);
+            ViewGroup parent = (ViewGroup) mBuilder.mTarget.getParent();
+            parent.removeView(mBuilder.mReplace);
+            mBuilder.mReplace = null;
+        }
     }
 
     private void setClick() {
@@ -177,12 +179,10 @@ public class StatePager {
     }
 
     private void replaceView(int layoutRes) {
-        if (mBuilder.mTarget == null) {
-            throw new NullPointerException("success view id is invalid");
-        }
         if (mBuilder.mReplace != null) {
             int id = mBuilder.mReplace.getId();
             if (id == layoutRes) {
+                mBuilder.mReplace.setVisibility(View.VISIBLE);
                 return;
             }
         }
@@ -199,6 +199,7 @@ public class StatePager {
         } else {
             mBuilder.mTarget.setVisibility(View.GONE);
         }
+        mBuilder.mReplace.setVisibility(View.VISIBLE);
     }
 
     public static class ViewHelper {
