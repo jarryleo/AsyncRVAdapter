@@ -2,6 +2,9 @@ package cn.leo.adapter;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -19,12 +22,14 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private TestRVAdapter mAdapter;
     private StatePager mStatePager;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main1);
         mRecyclerView = findViewById(R.id.rvTest);
+        mSwipeRefreshLayout = findViewById(R.id.srl_Refresh);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         mAdapter = new TestRVAdapter();
         mRecyclerView.setAdapter(mAdapter);
@@ -32,7 +37,37 @@ public class MainActivity extends AppCompatActivity {
         initData();
     }
 
+    private boolean noSwipe = true;
+
     private void initView() {
+        mSwipeRefreshLayout.setOnChildScrollUpCallback(new SwipeRefreshLayout.OnChildScrollUpCallback() {
+            @Override
+            public boolean canChildScrollUp(@NonNull SwipeRefreshLayout parent, @Nullable View child) {
+                return noSwipe;
+            }
+        });
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    noSwipe = recyclerView.canScrollVertically(-1);
+                }
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                noSwipe = true;
+            }
+        });
+
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                initData();
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        });
+
         mStatePager = StatePager.builder(mRecyclerView)
                 .loadingViewLayout(R.layout.pager_loading)
                 .emptyViewLayout(R.layout.pager_empty)
