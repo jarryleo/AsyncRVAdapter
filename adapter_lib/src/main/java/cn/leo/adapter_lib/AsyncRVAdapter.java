@@ -2,6 +2,8 @@ package cn.leo.adapter_lib;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.ColorInt;
+import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;
@@ -109,7 +111,7 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
     /**
      * 异步提交数据
      */
-    private void asyncSubmitList(final List<T> data){
+    private void asyncSubmitList(final List<T> data) {
         sMainThreadExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -117,6 +119,7 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
             }
         });
     }
+
     /**
      * 设置新的数据集
      *
@@ -267,6 +270,7 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
 
     private static class MainThreadExecutor implements Executor {
         final Handler mHandler = new Handler(Looper.getMainLooper());
+
         @Override
         public void execute(@NonNull Runnable command) {
             mHandler.post(command);
@@ -437,6 +441,40 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
             View view = getViewById(viewId);
             if (view instanceof TextView) {
                 ((TextView) view).setText(resId);
+            } else {
+                String entryName = view.getResources().getResourceEntryName(viewId);
+                throw new ClassCastException("id: R.id." + entryName + " are not TextView");
+            }
+            return this;
+        }
+
+        /**
+         * 设置文本颜色
+         *
+         * @param viewId 要设置文本的控件，TextView及其子类都可以
+         * @param color  颜色int值，不是资源Id
+         */
+        public ItemHelper setTextColor(@IdRes int viewId, @ColorInt int color) {
+            View view = getViewById(viewId);
+            if (view instanceof TextView) {
+                ((TextView) view).setTextColor(color);
+            } else {
+                String entryName = view.getResources().getResourceEntryName(viewId);
+                throw new ClassCastException("id: R.id." + entryName + " are not TextView");
+            }
+            return this;
+        }
+
+        /**
+         * 设置文本颜色
+         *
+         * @param viewId     要设置文本的控件，TextView及其子类都可以
+         * @param colorResId 颜色资源Id
+         */
+        public ItemHelper setTextColorRes(@IdRes int viewId, @ColorRes int colorResId) {
+            View view = getViewById(viewId);
+            if (view instanceof TextView) {
+                ((TextView) view).setTextColor(view.getResources().getColor(colorResId));
             } else {
                 String entryName = view.getResources().getResourceEntryName(viewId);
                 throw new ClassCastException("id: R.id." + entryName + " are not TextView");
