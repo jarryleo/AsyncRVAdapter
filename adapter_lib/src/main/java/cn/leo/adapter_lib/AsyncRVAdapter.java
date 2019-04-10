@@ -1,5 +1,7 @@
 package cn.leo.adapter_lib;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;
@@ -18,6 +20,8 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * @author : Jarry Leo
@@ -49,7 +53,8 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
         mDiffer = new AsyncListDiffer<>(this, diffCallback);
     }
 
-    private AsyncDifferConfig<T> mConfig = new AsyncDifferConfig.Builder<>(diffCallback).build();
+    private static final Executor sDiffExecutor = Executors.newFixedThreadPool(2);
+    private static final Executor sMainThreadExecutor = new MainThreadExecutor();
 
     /**
      * 异步比对去重，areItemsTheSame相同areContentsTheSame不同的则替换位置
@@ -58,7 +63,7 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
      * @param newList 新列表
      */
     private void asyncAddData(final List<T> oldList, final List<T> newList) {
-        mConfig.getBackgroundThreadExecutor().execute(new Runnable() {
+        sDiffExecutor.execute(new Runnable() {
             @Override
             public void run() {
                 boolean change = false;
@@ -83,7 +88,7 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
                     }
                 }
                 if (change) {
-                    mDiffer.submitList(oldList);
+                    asyncSubmitList(oldList);
                 }
             }
         });
@@ -102,12 +107,23 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
     }
 
     /**
+     * 异步提交数据
+     */
+    private void asyncSubmitList(final List<T> data){
+        sMainThreadExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                mDiffer.submitList(data);
+            }
+        });
+    }
+    /**
      * 设置新的数据集
      *
      * @param data 数据
      */
     public void setData(List<T> data) {
-        mDiffer.submitList(data);
+        asyncSubmitList(data);
     }
 
     /**
@@ -140,7 +156,7 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
         }
         List<T> list = getData();
         list.remove(position);
-        mDiffer.submitList(list);
+        asyncSubmitList(list);
     }
 
     /**
@@ -152,14 +168,14 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
     public void removeData(T data) {
         List<T> list = getData();
         list.remove(data);
-        mDiffer.submitList(list);
+        asyncSubmitList(list);
     }
 
     /**
      * 清空列表
      */
     public void removeAll() {
-        mDiffer.submitList(null);
+        asyncSubmitList(null);
     }
 
     /**
@@ -247,6 +263,14 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
         mOnItemClickListener = onItemClickListener;
+    }
+
+    private static class MainThreadExecutor implements Executor {
+        final Handler mHandler = new Handler(Looper.getMainLooper());
+        @Override
+        public void execute(@NonNull Runnable command) {
+            mHandler.post(command);
+        }
     }
 
     public interface OnItemClickListener {
