@@ -9,7 +9,6 @@ import android.support.annotation.IdRes;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
-import android.support.v7.recyclerview.extensions.AsyncDifferConfig;
 import android.support.v7.recyclerview.extensions.AsyncListDiffer;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
@@ -518,21 +517,27 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
             return this;
         }
 
-        public ItemHelper setViewVisble(@IdRes int viewId) {
-            View view = getViewById(viewId);
-            view.setVisibility(View.VISIBLE);
+        public ItemHelper setViewVisible(@IdRes int... viewId) {
+            for (int id : viewId) {
+                View view = getViewById(id);
+                view.setVisibility(View.VISIBLE);
+            }
             return this;
         }
 
-        public ItemHelper setViewInvisble(@IdRes int viewId) {
-            View view = getViewById(viewId);
-            view.setVisibility(View.INVISIBLE);
+        public ItemHelper setViewInvisible(@IdRes int... viewId) {
+            for (int id : viewId) {
+                View view = getViewById(id);
+                view.setVisibility(View.INVISIBLE);
+            }
             return this;
         }
 
-        public ItemHelper setViewGone(@IdRes int viewId) {
-            View view = getViewById(viewId);
-            view.setVisibility(View.GONE);
+        public ItemHelper setViewGone(@IdRes int... viewId) {
+            for (int id : viewId) {
+                View view = getViewById(id);
+                view.setVisibility(View.GONE);
+            }
             return this;
         }
 
