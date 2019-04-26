@@ -1,4 +1,5 @@
 package cn.leo.adapter_lib;
+package cn.leo.mybottombar.adapter;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -20,15 +21,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 /**
+ * 方便快速开发RecyclerView的adapter
  * @author : Jarry Leo
  * @date : 2019/3/19 16:09
  */
-public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
+public abstract class BaseRVAdapter<T> extends RecyclerView.Adapter {
     private AsyncListDiffer<T> mDiffer;
     private OnItemClickListener mOnItemClickListener;
     private OnItemLongClickListener mOnItemLongClickListener;
@@ -38,19 +42,19 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
         @Override
         public boolean areItemsTheSame(T oldItem, T newItem) {
             //是不是同一个item，不是则加到列表末尾
-            return AsyncRVAdapter.this.areItemsTheSame(oldItem, newItem);
+            return BaseRVAdapter.this.areItemsTheSame(oldItem, newItem);
         }
 
         @Override
         public boolean areContentsTheSame(T oldItem, T newItem) {
             //如果是同一个item，判断内容是不是相同，不相同则替换成新的
-            return AsyncRVAdapter.this.areContentsTheSame(oldItem, newItem);
+            return BaseRVAdapter.this.areContentsTheSame(oldItem, newItem);
         }
 
 
     };
 
-    public AsyncRVAdapter() {
+    public BaseRVAdapter() {
         mDiffer = new AsyncListDiffer<>(this, diffCallback);
     }
 
@@ -184,7 +188,7 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
      * 获取当前数据集
      *
      * @return 返回一个可修改的数据集，修改数据后通过
-     * @see AsyncRVAdapter#setData(List)
+     * @see BaseRVAdapter#setData(List)
      * 可以刷新列表
      */
 
@@ -254,6 +258,16 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
         return mDiffer.getCurrentList().size();
     }
 
+    @Override
+    public void onViewDetachedFromWindow(@NonNull RecyclerView.ViewHolder holder) {
+        ViewHolder viewHolder = (ViewHolder) holder;
+        ItemHelper helper = viewHolder.getItemHelper();
+        ItemHolder itemHolder = helper.mItemHolder;
+        if (itemHolder != null) {
+            itemHolder.onViewDetach(helper);
+        }
+    }
+
     /**
      * 给条目绑定数据
      *
@@ -261,7 +275,6 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
      * @param data   对应数据
      */
     protected abstract void bindData(ItemHelper helper, final T data);
-
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
         mOnItemClickListener = onItemClickListener;
@@ -284,7 +297,7 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
          * @param v        点击的view
          * @param position 条目索引
          */
-        void onItemClick(AsyncRVAdapter adapter, View v, int position);
+        void onItemClick(BaseRVAdapter adapter, View v, int position);
     }
 
     public void setOnItemLongClickListener(OnItemLongClickListener onItemLongClickListener) {
@@ -299,12 +312,21 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
          * @param v        点击的view
          * @param position 条目索引
          */
-        void onItemLongClick(AsyncRVAdapter adapter, View v, int position);
+        void onItemLongClick(BaseRVAdapter adapter, View v, int position);
     }
 
     public void setOnItemChildClickListener(OnItemChildClickListener onItemChildClickListener) {
         mOnItemChildClickListener = onItemChildClickListener;
     }
+
+    private OnItemChildClickListener mOnItemChildClickListenerProxy = new OnItemChildClickListener() {
+        @Override
+        public void onItemChildClick(BaseRVAdapter adapter, View v, int position) {
+            if (mOnItemChildClickListener != null) {
+                mOnItemChildClickListener.onItemChildClick(adapter, v, position);
+            }
+        }
+    };
 
     public interface OnItemChildClickListener {
         /**
@@ -314,7 +336,7 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
          * @param v        点击的view
          * @param position 条目索引
          */
-        void onItemChildClick(AsyncRVAdapter adapter, View v, int position);
+        void onItemChildClick(BaseRVAdapter adapter, View v, int position);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements
@@ -326,6 +348,8 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
                     .inflate(layout, parent, false));
             mItemHelper = new ItemHelper(itemView);
             mItemHelper.setLayoutResId(layout);
+            mItemHelper.setOnItemChildClickListener(mOnItemChildClickListenerProxy);
+            mItemHelper.setRVAdapter(BaseRVAdapter.this);
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
         }
@@ -338,23 +362,61 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
         @Override
         public void onClick(View v) {
             if (mOnItemClickListener != null) {
-                mOnItemClickListener.onItemClick(AsyncRVAdapter.this, v, mItemHelper.getPosition());
+                mOnItemClickListener.onItemClick(BaseRVAdapter.this, v, mItemHelper.getPosition());
             }
         }
 
         @Override
         public boolean onLongClick(View v) {
             if (mOnItemLongClickListener != null) {
-                mOnItemLongClickListener.onItemLongClick(AsyncRVAdapter.this, v, mItemHelper.getPosition());
+                mOnItemLongClickListener.onItemLongClick(BaseRVAdapter.this, v, mItemHelper.getPosition());
                 return true;
             }
             return false;
         }
+
+        public ItemHelper getItemHelper() {
+            return mItemHelper;
+        }
     }
 
-    public class ItemHelper implements View.OnClickListener {
+
+    /**
+     * 多条目类型防止 adapter臃肿，每个条目请继承此类
+     * @param <T> 数据类型
+     */
+    public static abstract class ItemHolder<T> {
+
+        /**
+         * 绑定数据
+         * @param helper 帮助类
+         * @param data 数据
+         */
+        public abstract void bindData(final ItemHelper helper, T data);
+
+        /**
+         * 初始化view，只在view第一次创建调用
+         * @param helper 帮助类
+         * @param data 数据
+         */
+        public void initView(final ItemHelper helper, T data) {
+        }
+
+
+        /**
+         * 被回收时调用，用来释放一些资源，或者重制数据等
+         * @param helper 帮助类
+         */
+        public void onViewDetach(final ItemHelper helper) {
+
+        }
+    }
+
+    public static class ItemHelper implements View.OnClickListener {
         private SparseArray<View> viewCache = new SparseArray<>();
         private List<Integer> clickListenerCache = new ArrayList<>();
+        private Map<String, Object> mTags = new HashMap<>();
+        private BaseRVAdapter mRVAdapter;
         private View itemView;
         private @LayoutRes
         int layoutResId;
@@ -363,6 +425,7 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
          * 携带额外绑定数据便于复用
          */
         private Object tag;
+        private OnItemChildClickListener mOnItemChildClickListener;
 
         public ItemHelper(View itemView) {
             this.itemView = itemView;
@@ -375,6 +438,18 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
 
         private void setLayoutResId(@LayoutRes int layoutResId) {
             this.layoutResId = layoutResId;
+        }
+
+        public void setOnItemChildClickListener(OnItemChildClickListener onItemChildClickListener) {
+            mOnItemChildClickListener = onItemChildClickListener;
+        }
+
+        public void setRVAdapter(BaseRVAdapter RVAdapter) {
+            mRVAdapter = RVAdapter;
+        }
+
+        public BaseRVAdapter getAdapter() {
+            return mRVAdapter;
         }
 
         public int getPosition() {
@@ -395,6 +470,14 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
 
         public void setTag(Object tag) {
             this.tag = tag;
+        }
+
+        public void setTag(String key, Object tag) {
+            mTags.put(key, tag);
+        }
+
+        public Object getTag(String key) {
+            return mTags.get(key);
         }
 
         public final <V extends View> V getViewById(@IdRes int viewId) {
@@ -558,7 +641,23 @@ public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
         @Override
         public void onClick(View v) {
             if (mOnItemChildClickListener != null) {
-                mOnItemChildClickListener.onItemChildClick(AsyncRVAdapter.this, v, mPosition);
+                mOnItemChildClickListener.onItemChildClick(mRVAdapter, v, mPosition);
+            }
+        }
+
+        private ItemHolder mItemHolder;
+
+        public <S extends ItemHolder> void setItemHolder(Class<S> itemHolderClass) {
+            try {
+                if (mItemHolder == null) {
+                    mItemHolder = itemHolderClass.newInstance();
+                    mItemHolder.initView(this, mRVAdapter.getItem(getPosition()));
+                }
+                mItemHolder.bindData(this, mRVAdapter.getItem(getPosition()));
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
             }
         }
     }
