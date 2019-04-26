@@ -1,5 +1,4 @@
 package cn.leo.adapter_lib;
-package cn.leo.mybottombar.adapter;
 
 import android.os.Handler;
 import android.os.Looper;
