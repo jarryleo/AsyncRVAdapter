@@ -9,10 +9,6 @@
 - 内置异步去重功能，需要重写2个条目判断方法
 - 条目布局绑定数据可以链式调用，书写优雅
 
-缺点:
-- 如果条目类型过多或者复杂容易导致bindData方法过于臃肿
-- 多个数据源不太好处理
-
 注意:
 > 需要依赖版本com.android.support:recyclerview-v7:27.1.0 及以上
 
@@ -96,6 +92,34 @@ public class TestRVAdapter extends AsyncRVAdapter<TestBean> {
     }
 }
 
+```
+多条目类型，条目分类处理实例
+```
+public class TestRvAdapter1 extends BaseRVAdapter<TestBean> {
+
+    @Override
+    protected int getItemLayout(int position) {
+        TestBean bean = getData().get(position);
+        if (bean.type == 1) {
+            return R.layout.item_banner1;
+        } else if (bean.type == 2){
+            return R.layout.item_recycler_view_vertical;
+        }
+        return R.layout.item_recycler_view_horizontal;
+    }
+
+    @Override
+    protected void bindData(final ItemHelper helper, TestBean data) {
+        if (data.type == 1) {
+            helper.setItemHolder(BannerHolder.class);
+        } else if(data.type == 0) {
+            helper.setItemHolder(RvHorizontalHolder.class);
+        }else if(data.type == 2) {
+            helper.setItemHolder(RvVerticalHolder.class);
+        }
+
+    }
+}
 ```
 用法：  
 点击复制这个类[AsyncRVAdapter.java](https://github.com/jarryleo/AsyncRVAdapter/blob/master/adapter_lib/src/main/java/cn/leo/adapter_lib/AsyncRVAdapter.java)
