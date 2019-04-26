@@ -93,7 +93,7 @@ public class TestRVAdapter extends AsyncRVAdapter<TestBean> {
 }
 
 ```
-多条目类型，条目分类处理实例
+多条目类型，条目分类处理用法：
 ```
 public class TestRvAdapter1 extends BaseRVAdapter<TestBean> {
 
