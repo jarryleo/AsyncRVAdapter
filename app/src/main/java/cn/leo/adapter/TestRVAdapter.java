@@ -48,6 +48,9 @@ public class TestRVAdapter extends AsyncRVAdapter<TestBean> {
         } else if (layout == R.layout.item_test_rv1) {
             helper.setText(R.id.tv_test, data.content)
                     .setBackgroundResource(R.id.tv_test, R.drawable.ic_launcher_background);
+
+            helper.setViewVisible(R.id.btn_retry,R.id.btnTest)
+                    .setViewInvisible(R.id.tv_test,R.id.tv_tips);
         }
     }
 }

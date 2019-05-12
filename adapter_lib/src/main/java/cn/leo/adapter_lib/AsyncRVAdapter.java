@@ -31,7 +31,7 @@ import java.util.concurrent.Executors;
  * @author : Jarry Leo
  * @date : 2019/3/19 16:09
  */
-public abstract class BaseRVAdapter<T> extends RecyclerView.Adapter {
+public abstract class AsyncRVAdapter<T> extends RecyclerView.Adapter {
     private AsyncListDiffer<T> mDiffer;
     private OnItemClickListener mOnItemClickListener;
     private OnItemLongClickListener mOnItemLongClickListener;
@@ -41,19 +41,19 @@ public abstract class BaseRVAdapter<T> extends RecyclerView.Adapter {
         @Override
         public boolean areItemsTheSame(T oldItem, T newItem) {
             //是不是同一个item，不是则加到列表末尾
-            return BaseRVAdapter.this.areItemsTheSame(oldItem, newItem);
+            return AsyncRVAdapter.this.areItemsTheSame(oldItem, newItem);
         }
 
         @Override
         public boolean areContentsTheSame(T oldItem, T newItem) {
             //如果是同一个item，判断内容是不是相同，不相同则替换成新的
-            return BaseRVAdapter.this.areContentsTheSame(oldItem, newItem);
+            return AsyncRVAdapter.this.areContentsTheSame(oldItem, newItem);
         }
 
 
     };
 
-    public BaseRVAdapter() {
+    public AsyncRVAdapter() {
         mDiffer = new AsyncListDiffer<>(this, diffCallback);
     }
 
@@ -187,7 +187,7 @@ public abstract class BaseRVAdapter<T> extends RecyclerView.Adapter {
      * 获取当前数据集
      *
      * @return 返回一个可修改的数据集，修改数据后通过
-     * @see BaseRVAdapter#setData(List)
+     * @see AsyncRVAdapter#setData(List)
      * 可以刷新列表
      */
 
@@ -296,7 +296,7 @@ public abstract class BaseRVAdapter<T> extends RecyclerView.Adapter {
          * @param v        点击的view
          * @param position 条目索引
          */
-        void onItemClick(BaseRVAdapter adapter, View v, int position);
+        void onItemClick(AsyncRVAdapter adapter, View v, int position);
     }
 
     public void setOnItemLongClickListener(OnItemLongClickListener onItemLongClickListener) {
@@ -311,7 +311,7 @@ public abstract class BaseRVAdapter<T> extends RecyclerView.Adapter {
          * @param v        点击的view
          * @param position 条目索引
          */
-        void onItemLongClick(BaseRVAdapter adapter, View v, int position);
+        void onItemLongClick(AsyncRVAdapter adapter, View v, int position);
     }
 
     public void setOnItemChildClickListener(OnItemChildClickListener onItemChildClickListener) {
@@ -320,7 +320,7 @@ public abstract class BaseRVAdapter<T> extends RecyclerView.Adapter {
 
     private OnItemChildClickListener mOnItemChildClickListenerProxy = new OnItemChildClickListener() {
         @Override
-        public void onItemChildClick(BaseRVAdapter adapter, View v, int position) {
+        public void onItemChildClick(AsyncRVAdapter adapter, View v, int position) {
             if (mOnItemChildClickListener != null) {
                 mOnItemChildClickListener.onItemChildClick(adapter, v, position);
             }
@@ -335,7 +335,7 @@ public abstract class BaseRVAdapter<T> extends RecyclerView.Adapter {
          * @param v        点击的view
          * @param position 条目索引
          */
-        void onItemChildClick(BaseRVAdapter adapter, View v, int position);
+        void onItemChildClick(AsyncRVAdapter adapter, View v, int position);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements
@@ -348,7 +348,7 @@ public abstract class BaseRVAdapter<T> extends RecyclerView.Adapter {
             mItemHelper = new ItemHelper(itemView);
             mItemHelper.setLayoutResId(layout);
             mItemHelper.setOnItemChildClickListener(mOnItemChildClickListenerProxy);
-            mItemHelper.setRVAdapter(BaseRVAdapter.this);
+            mItemHelper.setRVAdapter(AsyncRVAdapter.this);
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
         }
@@ -361,14 +361,14 @@ public abstract class BaseRVAdapter<T> extends RecyclerView.Adapter {
         @Override
         public void onClick(View v) {
             if (mOnItemClickListener != null) {
-                mOnItemClickListener.onItemClick(BaseRVAdapter.this, v, mItemHelper.getPosition());
+                mOnItemClickListener.onItemClick(AsyncRVAdapter.this, v, mItemHelper.getPosition());
             }
         }
 
         @Override
         public boolean onLongClick(View v) {
             if (mOnItemLongClickListener != null) {
-                mOnItemLongClickListener.onItemLongClick(BaseRVAdapter.this, v, mItemHelper.getPosition());
+                mOnItemLongClickListener.onItemLongClick(AsyncRVAdapter.this, v, mItemHelper.getPosition());
                 return true;
             }
             return false;
@@ -415,7 +415,7 @@ public abstract class BaseRVAdapter<T> extends RecyclerView.Adapter {
         private SparseArray<View> viewCache = new SparseArray<>();
         private List<Integer> clickListenerCache = new ArrayList<>();
         private Map<String, Object> mTags = new HashMap<>();
-        private BaseRVAdapter mRVAdapter;
+        private AsyncRVAdapter mRVAdapter;
         private View itemView;
         private @LayoutRes
         int layoutResId;
@@ -443,11 +443,11 @@ public abstract class BaseRVAdapter<T> extends RecyclerView.Adapter {
             mOnItemChildClickListener = onItemChildClickListener;
         }
 
-        public void setRVAdapter(BaseRVAdapter RVAdapter) {
+        public void setRVAdapter(AsyncRVAdapter RVAdapter) {
             mRVAdapter = RVAdapter;
         }
 
-        public BaseRVAdapter getAdapter() {
+        public AsyncRVAdapter getAdapter() {
             return mRVAdapter;
         }
 
