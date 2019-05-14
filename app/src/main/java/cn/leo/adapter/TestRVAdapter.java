@@ -1,24 +1,24 @@
 package cn.leo.adapter;
 
 
-import cn.leo.adapter_lib.AsyncRVAdapter;
+import cn.leo.adapter_lib.AsyncRvAdapterKt;
 
 /**
  * @author : Jarry Leo
  * @date : 2019/3/20 14:44
  */
-public class TestRVAdapter extends AsyncRVAdapter<TestBean> {
+public class TestRVAdapter extends AsyncRvAdapterKt<TestBean> {
 
     //以下两个方法用于条目判断，如果第一个相同，第二个不同，则替换
 
     @Override
-    protected boolean areItemsTheSame(TestBean oldItem, TestBean newItem) {
+    public boolean areItemsTheSame(TestBean oldItem, TestBean newItem) {
         //判断条目是否相同
         return oldItem.id == newItem.id;
     }
 
     @Override
-    protected boolean areContentsTheSame(TestBean oldItem, TestBean newItem) {
+    public boolean areContentsTheSame(TestBean oldItem, TestBean newItem) {
         //判断条目内容是否相同
         return oldItem.content.equals(newItem.content);
     }
