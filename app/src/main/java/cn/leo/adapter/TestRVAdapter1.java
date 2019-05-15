@@ -15,5 +15,6 @@ public class TestRVAdapter1 extends AsyncRvAdapterKt<TestBean> {
     @Override
     protected void bindData(ItemHelper helper, final TestBean data) {
         helper.setText(R.id.tv_test, data.content);
+        helper.setItemHolder(TestHolder.class);
     }
 }

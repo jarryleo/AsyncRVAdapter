@@ -12,8 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import java.util.ArrayList
-import java.util.HashMap
+import java.util.*
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
@@ -24,7 +23,7 @@ import java.util.concurrent.Executors
  * @author : Jarry Leo
  * @date : 2019/3/19 16:09
  */
-abstract class AsyncRvAdapterKt<T :Any> : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private var mAutoLoadMore = true
     private val mDiffer: AsyncListDiffer<T>
     private var mOnLoadMoreListener: OnLoadMoreListener? = null
@@ -327,7 +326,7 @@ abstract class AsyncRvAdapterKt<T :Any> : RecyclerView.Adapter<RecyclerView.View
      *
      * @param <T> 数据类型
     </T> */
-    abstract class ItemHolder<T:Any> {
+    abstract class ItemHolder<T : Any> {
 
         /**
          * 绑定数据
@@ -347,7 +346,7 @@ abstract class AsyncRvAdapterKt<T :Any> : RecyclerView.Adapter<RecyclerView.View
 
 
         /**
-         * 被回收时调用，用来释放一些资源，或者重制数据等
+         * 被回收时调用，用来释放一些资源，或者重置数据等
          *
          * @param helper 帮助类
          */
@@ -371,7 +370,6 @@ abstract class AsyncRvAdapterKt<T :Any> : RecyclerView.Adapter<RecyclerView.View
          */
         var tag: Any? = null
         private var mOnItemChildClickListener: OnItemChildClickListener? = null
-        var mItemHolder: ItemHolder<out Any>? = null
 
         fun setLayoutResId(@LayoutRes layoutResId: Int) {
             this.itemLayout = layoutResId
@@ -556,10 +554,12 @@ abstract class AsyncRvAdapterKt<T :Any> : RecyclerView.Adapter<RecyclerView.View
             }
         }
 
-        fun <S : ItemHolder<out Any>> setItemHolder(itemHolderClass: Class<S>) {
+        var mItemHolder: ItemHolder<Any>? = null
+        fun setItemHolder(itemHolderClass: Class<out ItemHolder<out Any>>) {
             try {
                 if (mItemHolder == null) {
-                    mItemHolder = itemHolderClass.newInstance()
+                    val newInstance = itemHolderClass.newInstance()
+                    mItemHolder = newInstance as ItemHolder<Any>?
                     mItemHolder!!.initView(this, adapter!!.getItem(position))
                 }
                 mItemHolder!!.bindData(this, adapter!!.getItem(position))

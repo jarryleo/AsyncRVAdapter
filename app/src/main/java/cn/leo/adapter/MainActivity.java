@@ -93,8 +93,7 @@ public class MainActivity extends AppCompatActivity {
         new SafetyMainHandler(this).postDelayed(new Runnable() {
             @Override
             public void run() {
-                mStatePager.showEmpty()
-                        .setText(R.id.tv_tips, "这里没有发现数据");
+                mStatePager.showSuccess();
             }
         }, 2000);
 
