@@ -72,6 +72,15 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
         notifyItemChanged(position)
     }
 
+    /**
+     * 编辑多个数据
+     */
+    fun edit(call: (position:Int,item: T) -> Boolean){
+        data.forEachIndexed { index, t ->
+            if(call(index,t))
+            notifyItemChanged(index)
+        }
+    }
 
     init {
         mDiffer = AsyncListDiffer(this, diffCallback)
@@ -252,9 +261,9 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
      * 给条目绑定数据
      *
      * @param helper 条目帮助类
-     * @param item   对应数据
+     * @param data   对应数据
      */
-    protected abstract fun bindData(helper: ItemHelper, item: T)
+    protected abstract fun bindData(helper: ItemHelper, data: T)
 
     fun setOnItemClickListener(onItemClickListener:
                                (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int) -> Unit) {

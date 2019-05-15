@@ -23,6 +23,11 @@ class MainActivity2 : AppCompatActivity() {
         adapter.edit(1){
             it.content="12345"
         }
+
+        adapter.edit { position, item ->
+            item.content = "xxxx"
+            true
+        }
     }
 
 }
