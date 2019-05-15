@@ -14,6 +14,15 @@ class MainActivity2 : AppCompatActivity() {
                     .replace(R.id.container, MainActivity2Fragment.newInstance())
                     .commitNow()
         }
+        test()
+    }
+
+    private fun test() {
+        val adapter = TestRVAdapter()
+
+        adapter.edit(1){
+            it.content="12345"
+        }
     }
 
 }

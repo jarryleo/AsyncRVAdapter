@@ -27,9 +27,12 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
     private var mAutoLoadMore = true
     private val mDiffer: AsyncListDiffer<T>
     private var mOnLoadMoreListener: OnLoadMoreListener? = null
-    private var mOnItemClickListener: OnItemClickListener? = null
-    private var mOnItemLongClickListener: OnItemLongClickListener? = null
-    private var mOnItemChildClickListener: OnItemChildClickListener? = null
+    private lateinit var mOnItemClickListener:
+            (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int)->Unit
+    private lateinit var mOnItemLongClickListener:
+            (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int)->Unit
+    private lateinit var mOnItemChildClickListener:
+            (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int)->Unit
     private val diffCallback = object : DiffUtil.ItemCallback<T>() {
 
         override fun areItemsTheSame(oldItem: T, newItem: T): Boolean {
@@ -41,35 +44,36 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
             //如果是同一个item，判断内容是不是相同，不相同则替换成新的
             return this@AsyncRvAdapterKt.areContentsTheSame(oldItem, newItem)
         }
-
-
     }
-    private val mOnItemChildClickListenerProxy = object : OnItemChildClickListener {
-        override fun onItemChildClick(adapter: AsyncRvAdapterKt<out Any>?, v: View, position: Int) {
-            if (mOnItemChildClickListener != null) {
-                mOnItemChildClickListener!!.onItemChildClick(adapter, v, position)
+
+    val mOnItemChildClickListenerProxy:
+            (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int)->Unit =
+            { adapter, v, position ->
+                if (::mOnItemChildClickListener.isInitialized){
+                    mOnItemChildClickListener(adapter, v, position)
+                }
             }
-        }
-    }
-
-    /**
-     * 获取当前数据集
-     *
-     * @return 返回一个可修改的数据集，修改数据后通过
-     * @see AsyncRvAdapterKt.setData
-     */
 
     /**
      * 设置新的数据集
      *
      * @param item 数据
      */
-    var mList: MutableList<T>
-        get() = ArrayList(mDiffer.currentList)
-        set(item) {
+    var data: MutableList<T>
+        get() = mDiffer.currentList.toMutableList()
+        set(list) {
             mAutoLoadMore = true
-            asyncSubmitList(item)
+            asyncSubmitList(list)
         }
+
+    /**
+     * 编辑单个数据
+     */
+    fun edit(position: Int, call: (t: T) -> Unit) {
+        call(getItem(position))
+        notifyItemChanged(position)
+    }
+
 
     init {
         mDiffer = AsyncListDiffer(this, diffCallback)
@@ -111,12 +115,12 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
     }
 
     private fun asyncAddData(item: List<T>) {
-        val oldList = mList
+        val oldList = data
         asyncAddData(oldList, item)
     }
 
     private fun asyncAddData(item: T) {
-        val oldList = mList
+        val oldList = data
         val newList = ArrayList<T>()
         newList.add(item)
         asyncAddData(oldList, newList)
@@ -156,7 +160,7 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
         if (position < 0 || position >= mDiffer.currentList.size) {
             return
         }
-        val list = mList
+        val list = data
         list.removeAt(position)
         asyncSubmitList(list)
     }
@@ -168,7 +172,7 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
      * @param item 条目对象
      */
     fun removeData(item: T) {
-        val list = mList
+        val list = data
         list.remove(item)
         asyncSubmitList(list)
     }
@@ -253,7 +257,8 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
      */
     protected abstract fun bindData(helper: ItemHelper, item: T)
 
-    fun setOnItemClickListener(onItemClickListener: OnItemClickListener) {
+    fun setOnItemClickListener(onItemClickListener:
+                               (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int)->Unit ) {
         mOnItemClickListener = onItemClickListener
     }
 
@@ -261,11 +266,13 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
         mOnLoadMoreListener = onLoadMoreListener
     }
 
-    fun setOnItemLongClickListener(onItemLongClickListener: OnItemLongClickListener) {
+    fun setOnItemLongClickListener(onItemLongClickListener:
+                                   (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int)->Unit ) {
         mOnItemLongClickListener = onItemLongClickListener
     }
 
-    fun setOnItemChildClickListener(onItemChildClickListener: OnItemChildClickListener) {
+    fun setOnItemChildClickListener(onItemChildClickListener:
+                                    (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int)->Unit ) {
         mOnItemChildClickListener = onItemChildClickListener
     }
 
@@ -369,13 +376,15 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
          * 携带额外绑定数据便于复用
          */
         var tag: Any? = null
-        private var mOnItemChildClickListener: OnItemChildClickListener? = null
+        private lateinit var mOnItemChildClickListener:
+                (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int)->Unit
 
         fun setLayoutResId(@LayoutRes layoutResId: Int) {
             this.itemLayout = layoutResId
         }
 
-        fun setOnItemChildClickListener(onItemChildClickListener: OnItemChildClickListener) {
+        fun setOnItemChildClickListener(onItemChildClickListener:
+                                        (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int)->Unit) {
             mOnItemChildClickListener = onItemChildClickListener
         }
 
@@ -549,8 +558,8 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
         }
 
         override fun onClick(v: View) {
-            if (mOnItemChildClickListener != null) {
-                mOnItemChildClickListener!!.onItemChildClick(adapter, v, position)
+            if (::mOnItemChildClickListener.isInitialized) {
+                mOnItemChildClickListener(adapter!!, v, position)
             }
         }
 
@@ -594,14 +603,14 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
         }
 
         override fun onClick(v: View) {
-            if (mOnItemClickListener != null) {
-                mOnItemClickListener!!.onItemClick(this@AsyncRvAdapterKt, v, itemHelper.position)
+            if (::mOnItemClickListener.isInitialized) {
+                mOnItemClickListener(this@AsyncRvAdapterKt, v, itemHelper.position)
             }
         }
 
         override fun onLongClick(v: View): Boolean {
-            if (mOnItemLongClickListener != null) {
-                mOnItemLongClickListener!!.onItemLongClick(this@AsyncRvAdapterKt, v, itemHelper.position)
+            if (::mOnItemLongClickListener.isInitialized) {
+                mOnItemLongClickListener(this@AsyncRvAdapterKt, v, itemHelper.position)
                 return true
             }
             return false

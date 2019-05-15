@@ -14,6 +14,11 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.leo.adapter_lib.AsyncRvAdapterKt;
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
+import kotlin.jvm.functions.Function3;
+
 /**
  * @author Leo
  */
@@ -100,21 +105,32 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btnTest).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, MainActivity2.class));
+                //startActivity(new Intent(MainActivity.this, MainActivity2.class));
+                mAdapter.edit(0, new Function1<TestBean, Unit>() {
+                    @Override
+                    public Unit invoke(TestBean testBean) {
+                        testBean.content = "xiugaichenggong";
+                        return null;                  }
+                });
+
+
             }
         });
-
         mAdapter.setOnItemClickListener((adapter, v, position) -> {
             TestBean item = (TestBean) adapter.getItem(position);
             Toast.makeText(MainActivity.this, "点击条目" + item.content, Toast.LENGTH_SHORT).show();
+            return null;
         });
+
         mAdapter.setOnItemLongClickListener((adapter, v, position) -> {
             TestBean item = (TestBean) adapter.getItem(position);
             Toast.makeText(MainActivity.this, "长按条目" + item.content, Toast.LENGTH_SHORT).show();
+            return null;
         });
         mAdapter.setOnItemChildClickListener((adapter, v, position) -> {
             TestBean item = (TestBean) adapter.getItem(position);
             Toast.makeText(MainActivity.this, "点击条目内的文本框" + item.content, Toast.LENGTH_SHORT).show();
+            return null;
         });
     }
 
@@ -126,7 +142,6 @@ public class MainActivity extends AppCompatActivity {
             e.content = "测试条目" + i;
             list.add(e);
         }
-        mAdapter.setMList(list);
-        mAdapter.notifyDataSetChanged();
+        mAdapter.setData(list);
     }
 }

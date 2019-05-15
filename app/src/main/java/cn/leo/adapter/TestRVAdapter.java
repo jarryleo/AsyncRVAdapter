@@ -37,14 +37,14 @@ public class TestRVAdapter extends AsyncRvAdapterKt<TestBean> {
             helper.setText(R.id.tv_test, data.content)
                     //订阅条目内文本框点击事件
                     .addOnClickListener(R.id.tv_test);
-            StatePager pager = (StatePager) helper.getTag();
+           /* StatePager pager = (StatePager) helper.getTag();
             if (pager == null) {
                 pager = StatePager.builder(helper.getItemView())
                         .emptyViewLayout(R.layout.pager_empty)
                         .build();
                 helper.setTag(pager);
             }
-            pager.showEmpty();
+            pager.showEmpty();*/
         } else if (layout == R.layout.item_test_rv1) {
             helper.setText(R.id.tv_test, data.content)
                     .setBackgroundResource(R.id.tv_test, R.drawable.ic_launcher_background);
