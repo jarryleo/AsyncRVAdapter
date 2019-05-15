@@ -11,6 +11,7 @@
 
 注意:
 > 需要依赖版本com.android.support:recyclerview-v7:27.1.0 及以上
+> 不要从adapter拿数据修改后再塞回去，否则不会更新UI
 
 最简用法：
 ```

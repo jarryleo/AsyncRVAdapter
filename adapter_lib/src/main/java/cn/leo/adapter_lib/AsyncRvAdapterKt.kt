@@ -12,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import java.util.*
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
@@ -27,11 +26,11 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
     private var mAutoLoadMore = true
     private val mDiffer: AsyncListDiffer<T>
     private lateinit var mOnLoadMoreListener:
-            (adapter: AsyncRvAdapterKt<out Any>, lastItemPosition: Int) -> Boolean
+            (adapter: AsyncRvAdapterKt<T>, lastItemPosition: Int) -> Boolean
     private lateinit var mOnItemClickListener:
-            (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int) -> Unit
+            (adapter: AsyncRvAdapterKt<T>, v: View, position: Int) -> Unit
     private lateinit var mOnItemLongClickListener:
-            (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int) -> Unit
+            (adapter: AsyncRvAdapterKt<T>, v: View, position: Int) -> Unit
     private lateinit var mOnItemChildClickListener:
             (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int) -> Unit
     private val diffCallback = object : DiffUtil.ItemCallback<T>() {
@@ -56,7 +55,7 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
             }
 
     /**
-     * 设置新的数据集
+     * 获取和设置新的数据集
      */
     var data: MutableList<T>
         get() = mDiffer.currentList.toMutableList()
@@ -152,6 +151,7 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
 
     /**
      * 根据索引移除条目
+     * 暂时不能连续移除，因为异步操作，会导致数据不准
      *
      * @param position 条目索引
      */
