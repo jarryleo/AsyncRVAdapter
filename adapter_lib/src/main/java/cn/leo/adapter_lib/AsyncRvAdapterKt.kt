@@ -26,13 +26,14 @@ import java.util.concurrent.Executors
 abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private var mAutoLoadMore = true
     private val mDiffer: AsyncListDiffer<T>
-    private var mOnLoadMoreListener: OnLoadMoreListener? = null
+    private lateinit var mOnLoadMoreListener:
+            (adapter: AsyncRvAdapterKt<out Any>, lastItemPosition: Int) -> Boolean
     private lateinit var mOnItemClickListener:
-            (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int)->Unit
+            (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int) -> Unit
     private lateinit var mOnItemLongClickListener:
-            (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int)->Unit
+            (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int) -> Unit
     private lateinit var mOnItemChildClickListener:
-            (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int)->Unit
+            (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int) -> Unit
     private val diffCallback = object : DiffUtil.ItemCallback<T>() {
 
         override fun areItemsTheSame(oldItem: T, newItem: T): Boolean {
@@ -47,17 +48,15 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
     }
 
     val mOnItemChildClickListenerProxy:
-            (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int)->Unit =
+            (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int) -> Unit =
             { adapter, v, position ->
-                if (::mOnItemChildClickListener.isInitialized){
+                if (::mOnItemChildClickListener.isInitialized) {
                     mOnItemChildClickListener(adapter, v, position)
                 }
             }
 
     /**
      * 设置新的数据集
-     *
-     * @param item 数据
      */
     var data: MutableList<T>
         get() = mDiffer.currentList.toMutableList()
@@ -136,19 +135,19 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
     /**
      * 新增数据集
      *
-     * @param item 数据集
+     * @param newData 数据集
      */
-    fun addData(item: List<T>) {
-        asyncAddData(item)
+    fun addData(newData: List<T>) {
+        asyncAddData(newData)
     }
 
     /**
      * 新增单条数据
      *
-     * @param item 数据
+     * @param newData 数据
      */
-    fun addData(item: T) {
-        asyncAddData(item)
+    fun addData(newData: T) {
+        asyncAddData(newData)
     }
 
     /**
@@ -258,66 +257,23 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
     protected abstract fun bindData(helper: ItemHelper, item: T)
 
     fun setOnItemClickListener(onItemClickListener:
-                               (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int)->Unit ) {
+                               (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int) -> Unit) {
         mOnItemClickListener = onItemClickListener
     }
 
-    fun setLoadMoreListener(onLoadMoreListener: OnLoadMoreListener) {
+    fun setLoadMoreListener(onLoadMoreListener:
+                            (adapter: AsyncRvAdapterKt<out Any>, lastItemPosition: Int) -> Boolean) {
         mOnLoadMoreListener = onLoadMoreListener
     }
 
     fun setOnItemLongClickListener(onItemLongClickListener:
-                                   (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int)->Unit ) {
+                                   (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int) -> Unit) {
         mOnItemLongClickListener = onItemLongClickListener
     }
 
     fun setOnItemChildClickListener(onItemChildClickListener:
-                                    (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int)->Unit ) {
+                                    (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int) -> Unit) {
         mOnItemChildClickListener = onItemChildClickListener
-    }
-
-    interface OnItemClickListener {
-        /**
-         * 点击条目
-         *
-         * @param adapter  当前适配器
-         * @param v        点击的view
-         * @param position 条目索引
-         */
-        fun onItemClick(adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int)
-    }
-
-    interface OnItemLongClickListener {
-        /**
-         * 长按点击条目
-         *
-         * @param adapter  当前适配器
-         * @param v        点击的view
-         * @param position 条目索引
-         */
-        fun onItemLongClick(adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int)
-    }
-
-    interface OnItemChildClickListener {
-        /**
-         * 点击条目内部的view
-         *
-         * @param adapter  当前适配器
-         * @param v        点击的view
-         * @param position 条目索引
-         */
-        fun onItemChildClick(adapter: AsyncRvAdapterKt<out Any>?, v: View, position: Int)
-    }
-
-    interface OnLoadMoreListener {
-        /**
-         * 自动加载更多
-         *
-         * @param adapter          适配器
-         * @param lastItemPosition 最后一个条目的索引
-         * @return 是否还有更多
-         */
-        fun onLoadMore(adapter: AsyncRvAdapterKt<out Any>, lastItemPosition: Int): Boolean
     }
 
     private class MainThreadExecutor : Executor {
@@ -357,9 +313,7 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
          *
          * @param helper 帮助类
          */
-        fun onViewDetach(helper: ItemHelper) {
-
-        }
+        fun onViewDetach(helper: ItemHelper) {}
     }
 
     class ItemHelper(val itemView: View) : View.OnClickListener {
@@ -377,14 +331,14 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
          */
         var tag: Any? = null
         private lateinit var mOnItemChildClickListener:
-                (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int)->Unit
+                (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int) -> Unit
 
         fun setLayoutResId(@LayoutRes layoutResId: Int) {
             this.itemLayout = layoutResId
         }
 
         fun setOnItemChildClickListener(onItemChildClickListener:
-                                        (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int)->Unit) {
+                                        (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int) -> Unit) {
             mOnItemChildClickListener = onItemChildClickListener
         }
 
@@ -400,7 +354,7 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
             return mTags[key]!!
         }
 
-        fun <V : View> getViewById(@IdRes viewId: Int): V {
+        fun <V : View> getViewById(@IdRes viewId: Int, call: (V) -> Unit = {}): ItemHelper {
             val v = viewCache.get(viewId)
             val view: V?
             if (v == null) {
@@ -413,7 +367,8 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
             } else {
                 view = v as V
             }
-            return view
+            call(view)
+            return this
         }
 
         /**
@@ -423,12 +378,13 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
          * @param text   设置的文字
          */
         fun setText(@IdRes viewId: Int, text: CharSequence): ItemHelper {
-            val view = getViewById<View>(viewId)
-            if (view is TextView) {
-                view.text = text
-            } else {
-                val entryName = view.resources.getResourceEntryName(viewId)
-                throw ClassCastException("id: R.id.$entryName are not TextView")
+            getViewById<View>(viewId) {
+                if (it is TextView) {
+                    it.text = text
+                } else {
+                    val entryName = it.resources.getResourceEntryName(viewId)
+                    throw ClassCastException("id: R.id.$entryName are not TextView")
+                }
             }
             return this
         }
@@ -440,12 +396,17 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
          * @param resId  设置的文字资源
          */
         fun setText(@IdRes viewId: Int, @StringRes resId: Int): ItemHelper {
-            val view = getViewById<View>(viewId)
-            if (view is TextView) {
-                view.setText(resId)
-            } else {
-                val entryName = view.resources.getResourceEntryName(viewId)
-                throw ClassCastException("id: R.id.$entryName are not TextView")
+            getViewById<View>(viewId) {
+                if (it is TextView) {
+                    it.text = try {
+                        it.resources.getString(resId)
+                    } catch (e: Exception) {
+                        resId.toString()
+                    }
+                } else {
+                    val entryName = it.resources.getResourceEntryName(viewId)
+                    throw ClassCastException("id: R.id.$entryName are not TextView")
+                }
             }
             return this
         }
@@ -457,12 +418,13 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
          * @param color  颜色int值，不是资源Id
          */
         fun setTextColor(@IdRes viewId: Int, @ColorInt color: Int): ItemHelper {
-            val view = getViewById<View>(viewId)
-            if (view is TextView) {
-                view.setTextColor(color)
-            } else {
-                val entryName = view.resources.getResourceEntryName(viewId)
-                throw ClassCastException("id: R.id.$entryName are not TextView")
+            getViewById<View>(viewId) {
+                if (it is TextView) {
+                    it.setTextColor(color)
+                } else {
+                    val entryName = it.resources.getResourceEntryName(viewId)
+                    throw ClassCastException("id: R.id.$entryName are not TextView")
+                }
             }
             return this
         }
@@ -474,12 +436,13 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
          * @param colorResId 颜色资源Id
          */
         fun setTextColorRes(@IdRes viewId: Int, @ColorRes colorResId: Int): ItemHelper {
-            val view = getViewById<View>(viewId)
-            if (view is TextView) {
-                view.setTextColor(view.getResources().getColor(colorResId))
-            } else {
-                val entryName = view.resources.getResourceEntryName(viewId)
-                throw ClassCastException("id: R.id.$entryName are not TextView")
+            getViewById<View>(viewId) {
+                if (it is TextView) {
+                    it.setTextColor(it.getResources().getColor(colorResId))
+                } else {
+                    val entryName = it.resources.getResourceEntryName(viewId)
+                    throw ClassCastException("id: R.id.$entryName are not TextView")
+                }
             }
             return this
         }
@@ -491,12 +454,13 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
          * @param resId  资源id
          */
         fun setImageResource(@IdRes viewId: Int, @DrawableRes resId: Int): ItemHelper {
-            val view = getViewById<View>(viewId)
-            if (view is ImageView) {
-                view.setImageResource(resId)
-            } else {
-                val entryName = view.resources.getResourceEntryName(viewId)
-                throw ClassCastException("id: R.id.$entryName are not ImageView")
+            getViewById<View>(viewId) {
+                if (it is ImageView) {
+                    it.setImageResource(resId)
+                } else {
+                    val entryName = it.resources.getResourceEntryName(viewId)
+                    throw ClassCastException("id: R.id.$entryName are not ImageView")
+                }
             }
             return this
         }
@@ -508,37 +472,42 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
          * @param resId  资源id
          */
         fun setBackgroundResource(@IdRes viewId: Int, @DrawableRes resId: Int): ItemHelper {
-            val view = getViewById<View>(viewId)
-            view.setBackgroundResource(resId)
+            getViewById<View>(viewId){
+                it.setBackgroundResource(resId)
+            }
             return this
         }
 
         fun setVisibility(@IdRes viewId: Int, visibility: Int): ItemHelper {
-            val view = getViewById<View>(viewId)
-            view.visibility = visibility
+            getViewById<View>(viewId){
+                it.visibility = visibility
+            }
             return this
         }
 
         fun setViewVisible(@IdRes vararg viewId: Int): ItemHelper {
             for (id in viewId) {
-                val view = getViewById<View>(id)
-                view.visibility = View.VISIBLE
+                getViewById<View>(id){
+                    it.visibility = View.VISIBLE
+                }
             }
             return this
         }
 
         fun setViewInvisible(@IdRes vararg viewId: Int): ItemHelper {
             for (id in viewId) {
-                val view = getViewById<View>(id)
-                view.visibility = View.INVISIBLE
+                getViewById<View>(id){
+                    it.visibility = View.INVISIBLE
+                }
             }
             return this
         }
 
         fun setViewGone(@IdRes vararg viewId: Int): ItemHelper {
             for (id in viewId) {
-                val view = getViewById<View>(id)
-                view.visibility = View.GONE
+                getViewById<View>(id){
+                    it.visibility = View.GONE
+                }
             }
             return this
         }
@@ -551,7 +520,7 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
         fun addOnClickListener(@IdRes viewId: Int): ItemHelper {
             val contains = clickListenerCache.contains(viewId)
             if (!contains) {
-                getViewById<View>(viewId).setOnClickListener(this)
+                getViewById<View>(viewId){it.setOnClickListener(this)}
                 clickListenerCache.add(viewId)
             }
             return this
@@ -581,12 +550,14 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
         }
     }
 
-    inner class ViewHolder internal constructor(parent: ViewGroup, layout: Int) : RecyclerView.ViewHolder(LayoutInflater.from(parent.context)
-            .inflate(layout, parent, false)), View.OnClickListener, View.OnLongClickListener {
-        val itemHelper: ItemHelper
+    inner class ViewHolder internal constructor(parent: ViewGroup, layout: Int) :
+            RecyclerView.ViewHolder(LayoutInflater.from(parent.context)
+                    .inflate(layout, parent, false)),
+            View.OnClickListener,
+            View.OnLongClickListener {
+        val itemHelper: ItemHelper = ItemHelper(itemView)
 
         init {
-            itemHelper = ItemHelper(itemView)
             itemHelper.setLayoutResId(layout)
             itemHelper.setOnItemChildClickListener(mOnItemChildClickListenerProxy)
             itemHelper.setRVAdapter(this@AsyncRvAdapterKt)
@@ -597,8 +568,9 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
         fun setData(position: Int) {
             itemHelper.position = position
             bindData(itemHelper, getItem(position))
-            if (mOnLoadMoreListener != null && mAutoLoadMore && position == itemCount - 1) {
-                mAutoLoadMore = mOnLoadMoreListener!!.onLoadMore(this@AsyncRvAdapterKt, itemCount - 1)
+            if (::mOnLoadMoreListener.isInitialized && mAutoLoadMore && position == itemCount - 1) {
+                mAutoLoadMore = mOnLoadMoreListener(
+                        this@AsyncRvAdapterKt, itemCount - 1)
             }
         }
 
