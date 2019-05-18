@@ -314,7 +314,7 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
          * @param helper 帮助类
          * @param item   数据
          */
-        fun initView(helper: ItemHelper, item: T) {}
+        open fun initView(helper: ItemHelper, item: T) {}
 
 
         /**
@@ -322,7 +322,7 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
          *
          * @param helper 帮助类
          */
-        fun onViewDetach(helper: ItemHelper) {}
+        open fun onViewDetach(helper: ItemHelper) {}
     }
 
     class ItemHelper(val itemView: View) : View.OnClickListener {
@@ -360,7 +360,7 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
         }
 
         fun getTag(key: String): Any {
-            return mTags[key]!!
+            return mTags[key]?:Any()
         }
 
         fun <V : View> getViewById(@IdRes viewId: Int, call: (V) -> Unit = {}): ItemHelper {
