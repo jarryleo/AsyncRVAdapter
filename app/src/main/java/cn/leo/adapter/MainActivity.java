@@ -1,6 +1,5 @@
 package cn.leo.adapter;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,10 +13,8 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-import cn.leo.adapter_lib.AsyncRvAdapterKt;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
-import kotlin.jvm.functions.Function3;
 
 /**
  * @author Leo

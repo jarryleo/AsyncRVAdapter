@@ -1,7 +1,7 @@
 package cn.leo.adapter
 
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 import cn.leo.adapter.ui.mainactivity2.MainActivity2Fragment
 
 class MainActivity2 : AppCompatActivity() {
@@ -22,11 +22,6 @@ class MainActivity2 : AppCompatActivity() {
 
         adapter.edit(1){
             it.content="12345"
-        }
-
-        adapter.edit { position, item ->
-            item.content = "xxxx"
-            true
         }
     }
 

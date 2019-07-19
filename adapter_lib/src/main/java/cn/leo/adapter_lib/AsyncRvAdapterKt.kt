@@ -34,6 +34,14 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
             (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int) -> Unit
     private lateinit var mOnItemChildClickListener:
             (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int) -> Unit
+    private val mOnItemChildClickListenerProxy:
+            (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int) -> Unit =
+            { adapter, v, position ->
+                if (::mOnItemChildClickListener.isInitialized) {
+                    mOnItemChildClickListener(adapter, v, position)
+                }
+            }
+
     private val diffCallback = object : DiffUtil.ItemCallback<T>() {
 
         override fun areItemsTheSame(oldItem: T, newItem: T): Boolean {
@@ -47,13 +55,6 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
         }
     }
 
-    val mOnItemChildClickListenerProxy:
-            (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int) -> Unit =
-            { adapter, v, position ->
-                if (::mOnItemChildClickListener.isInitialized) {
-                    mOnItemChildClickListener(adapter, v, position)
-                }
-            }
 
     /**
      * 设置新的数据集
