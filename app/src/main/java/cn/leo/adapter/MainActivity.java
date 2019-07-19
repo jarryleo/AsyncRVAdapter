@@ -7,14 +7,17 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.leo.adapter_lib.LeoRvAdapter;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
+import kotlin.jvm.functions.Function2;
 
 /**
  * @author Leo
@@ -107,10 +110,9 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public Unit invoke(TestBean testBean) {
                         testBean.content = "xiugaichenggong";
-                        return null;                  }
+                        return null;
+                    }
                 });
-
-
             }
         });
         mAdapter.setOnItemClickListener((adapter, v, position) -> {
@@ -129,6 +131,14 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(MainActivity.this, "点击条目内的文本框" + item.content, Toast.LENGTH_SHORT).show();
             return null;
         });
+
+        mAdapter.setLoadMoreListener(new Function2<LeoRvAdapter<?>, Integer, Unit>() {
+            @Override
+            public Unit invoke(LeoRvAdapter<?> leoRvAdapter, Integer integer) {
+                loadMore(integer + 1);
+                return null;
+            }
+        });
     }
 
     private void initData() {
@@ -140,5 +150,17 @@ public class MainActivity extends AppCompatActivity {
             list.add(e);
         }
         mAdapter.setData(list);
+    }
+
+    private void loadMore(int index) {
+        List<TestBean> list = new ArrayList<>();
+        for (int i = index; i < index + 20; i++) {
+            TestBean e = new TestBean();
+            e.id = i;
+            e.content = "测试条目" + i;
+            list.add(e);
+        }
+        Log.d("-====", "loadMore: 加载更多");
+        mAdapter.add(list);
     }
 }

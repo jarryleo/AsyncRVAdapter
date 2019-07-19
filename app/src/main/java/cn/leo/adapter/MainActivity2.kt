@@ -23,6 +23,14 @@ class MainActivity2 : AppCompatActivity() {
         adapter.edit(1){
             it.content="12345"
         }
+
+        adapter.edit(predicate = {
+            position, item ->
+            true
+        }){
+            position, item ->
+
+        }
     }
 
 }

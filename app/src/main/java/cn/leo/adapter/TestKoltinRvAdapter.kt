@@ -1,8 +1,8 @@
 package cn.leo.adapter
 
-import cn.leo.adapter_lib.AsyncRvAdapterKt
+import cn.leo.adapter_lib.LeoRvAdapter
 
-class TestKoltinRvAdapter:AsyncRvAdapterKt<TestKotlinBean>() {
+class TestKoltinRvAdapter:LeoRvAdapter<TestKotlinBean>() {
     override fun getItemLayout(position: Int): Int {
 
         return 0

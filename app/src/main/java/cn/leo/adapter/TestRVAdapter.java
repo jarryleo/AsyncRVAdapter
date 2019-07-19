@@ -1,13 +1,13 @@
 package cn.leo.adapter;
 
 
-import cn.leo.adapter_lib.AsyncRvAdapterKt;
+import cn.leo.adapter_lib.LeoRvAdapter;
 
 /**
  * @author : Jarry Leo
  * @date : 2019/3/20 14:44
  */
-public class TestRVAdapter extends AsyncRvAdapterKt<TestBean> {
+public class TestRVAdapter extends LeoRvAdapter<TestBean> {
 
     //以下两个方法用于条目判断，如果第一个相同，第二个不同，则替换
 
@@ -32,7 +32,7 @@ public class TestRVAdapter extends AsyncRvAdapterKt<TestBean> {
 
     @Override
     protected void bindData(ItemHelper helper, final TestBean data) {
-        int layout = helper.getItemLayout();
+        int layout = helper.getItemLayoutResId();
         if (layout == R.layout.item_test_rv) {
             helper.setText(R.id.tv_test, data.content)
                     //订阅条目内文本框点击事件
