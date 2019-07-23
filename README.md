@@ -123,7 +123,7 @@ public class TestRvAdapter1 extends BaseRVAdapter<TestBean> {
 }
 ```
 用法：  
-点击复制这个类[LeoRvAdapter.java](https://github.com/jarryleo/AsyncRVAdapter/blob/master/adapter_lib/src/main/java/cn/leo/adapter_lib/LeoRvAdapter.kt)
+点击复制这个类[LeoRvAdapter.kt](https://github.com/jarryleo/AsyncRVAdapter/blob/master/adapter_lib/src/main/java/cn/leo/adapter_lib/LeoRvAdapter.kt)
 
 因为只有一个类，推荐上面用法
 
