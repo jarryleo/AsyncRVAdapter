@@ -1,4 +1,4 @@
-package com.dingsheng.dsvideo.module_base.utils
+package cn.leo.adapter_lib
 
 import android.view.View
 import android.widget.Checkable

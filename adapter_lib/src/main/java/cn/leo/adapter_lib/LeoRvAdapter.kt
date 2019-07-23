@@ -15,7 +15,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import com.dingsheng.dsvideo.module_base.utils.singleClick
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
@@ -236,7 +235,7 @@ abstract class LeoRvAdapter<T : Any> : RecyclerView.Adapter<RecyclerView.ViewHol
             itemHelper.setLayoutResId(layout)
             itemHelper.setOnItemChildClickListener(mOnItemChildClickListenerProxy)
             itemHelper.setRVAdapter(this@LeoRvAdapter)
-            itemView.singleClick(this)
+            itemView.setOnClickListener(this)
             itemView.setOnLongClickListener(this)
         }
 
