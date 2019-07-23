@@ -8,6 +8,7 @@ import android.support.annotation.*
 import android.support.v7.recyclerview.extensions.AsyncListDiffer
 import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.RecyclerView.NO_POSITION
 import android.util.SparseArray
 import android.view.LayoutInflater
 import android.view.View
@@ -24,11 +25,12 @@ abstract class LeoRvAdapter<T : Any> : RecyclerView.Adapter<RecyclerView.ViewHol
     /**
      * 列表赋值和取值
      */
-    var data: List<T> = listOf()
+    open var data: List<T> = listOf()
+        get() = mDiffer.currentList
         set(value) {
             mLoadMoreCount = 0
             autoLoadMore = true
-            field = value.toList()
+            field = value
             sMainThreadExecutor.execute { mDiffer.submitList(field) }
         }
 
@@ -91,7 +93,6 @@ abstract class LeoRvAdapter<T : Any> : RecyclerView.Adapter<RecyclerView.ViewHol
             if (change) {
                 data = oldList
             }
-
         }
     }
 
@@ -240,11 +241,20 @@ abstract class LeoRvAdapter<T : Any> : RecyclerView.Adapter<RecyclerView.ViewHol
         }
 
         var mPosition = 0
+        get() {
+            if (field != adapterPosition){
+                if (adapterPosition != NO_POSITION) {
+                    mPosition = adapterPosition
+                    return adapterPosition
+                }
+            }
+            return field
+        }
 
         fun onBindViewHolder(position: Int) {
             mPosition = position
-            bindData(itemHelper, data[position])
-            loadMore(position)
+            bindData(itemHelper, data[mPosition])
+            loadMore(mPosition)
         }
 
         override fun onClick(v: View) {
@@ -281,8 +291,9 @@ abstract class LeoRvAdapter<T : Any> : RecyclerView.Adapter<RecyclerView.ViewHol
         @LayoutRes
         @get:LayoutRes
         var itemLayoutResId: Int = 0
+        val position
+        get() = viewHolder.mPosition
         val itemView: View = viewHolder.itemView
-        val position: Int = viewHolder.mPosition
         val context: Context = itemView.context
         var tag: Any? = null
 
@@ -516,7 +527,7 @@ abstract class LeoRvAdapter<T : Any> : RecyclerView.Adapter<RecyclerView.ViewHol
 
         override fun onClick(v: View) {
             if (::mOnItemChildClickListener.isInitialized) {
-                mOnItemChildClickListener(adapter, v, viewHolder.mPosition)
+                mOnItemChildClickListener(adapter, v, position)
             }
         }
 
@@ -527,9 +538,9 @@ abstract class LeoRvAdapter<T : Any> : RecyclerView.Adapter<RecyclerView.ViewHol
                 if (mItemHolder == null) {
                     val newInstance = itemHolderClass.newInstance()
                     mItemHolder = newInstance as ItemHolder<Any>?
-                    mItemHolder?.initView(this, adapter.data[viewHolder.mPosition])
+                    mItemHolder?.initView(this, adapter.data[position])
                 }
-                mItemHolder?.bindData(this, adapter.data[viewHolder.mPosition])
+                mItemHolder?.bindData(this, adapter.data[position])
             } catch (e: InstantiationException) {
                 e.printStackTrace()
             } catch (e: IllegalAccessException) {

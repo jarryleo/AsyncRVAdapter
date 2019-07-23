@@ -1,6 +1,8 @@
 package cn.leo.adapter;
 
 
+import android.support.annotation.NonNull;
+
 import cn.leo.adapter_lib.LeoRvAdapter;
 
 /**
@@ -31,7 +33,7 @@ public class TestRVAdapter extends LeoRvAdapter<TestBean> {
     }
 
     @Override
-    protected void bindData(ItemHelper helper, final TestBean data) {
+    protected void bindData(@NonNull ItemHelper helper, @NonNull final TestBean data) {
         int layout = helper.getItemLayoutResId();
         if (layout == R.layout.item_test_rv) {
             helper.setText(R.id.tv_test, data.content)
