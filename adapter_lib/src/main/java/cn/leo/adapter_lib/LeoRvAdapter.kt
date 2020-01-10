@@ -1,4 +1,4 @@
-package cn.leo.adapter_lib
+package cn.leo.frame.ui
 
 import android.content.Context
 import android.os.Build
@@ -51,6 +51,7 @@ abstract class LeoRvAdapter<T : Any> : RecyclerView.Adapter<RecyclerView.ViewHol
     fun add(list: List<T>) {
         data = data.toMutableList().apply { addAll(list) }
     }
+
 
     /**
      * 列表异步去重追加
@@ -117,20 +118,23 @@ abstract class LeoRvAdapter<T : Any> : RecyclerView.Adapter<RecyclerView.ViewHol
     /**
      * 编辑单个数据
      */
-    fun edit(position: Int, call: (item: T) -> Unit) {
+    fun edit(position: Int, payload: Any? = null, call: (item: T) -> Unit) {
         call(data[position])
-        notifyItemChanged(position, javaClass.simpleName)
+        notifyItemChanged(position, payload)
     }
 
     /**
      * 编辑符合条件的数据
      */
-    inline fun edit(predicate: (position: Int, item: T) -> Boolean,
-                    call: (position: Int, item: T) -> Unit) {
+    inline fun edit(
+            predicate: (position: Int, item: T) -> Boolean,
+            payload: Any? = null,
+            call: (position: Int, item: T) -> Unit
+    ) {
         data.forEachIndexed { index, t ->
             if (predicate(index, t)) {
                 call(index, t)
-                notifyItemChanged(index, javaClass.simpleName)
+                notifyItemChanged(index, payload)
             }
         }
     }
@@ -157,7 +161,11 @@ abstract class LeoRvAdapter<T : Any> : RecyclerView.Adapter<RecyclerView.ViewHol
     /**
      * 局部刷新
      */
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int, payloads: MutableList<Any>) {
+    override fun onBindViewHolder(
+            holder: RecyclerView.ViewHolder,
+            position: Int,
+            payloads: MutableList<Any>
+    ) {
         if (payloads.isEmpty()) {
             onBindViewHolder(holder, position)
         } else {
@@ -166,9 +174,9 @@ abstract class LeoRvAdapter<T : Any> : RecyclerView.Adapter<RecyclerView.ViewHol
             val itemHolder = helper?.mItemHolder
             val item = data[position]
             if (itemHolder != null) {
-                itemHolder.bindData(helper, item)
+                itemHolder.bindData(helper, item, payloads)
             } else {
-                onBindViewHolder(holder, position)
+                viewHolder?.onBindViewHolder(position, payloads)
             }
         }
     }
@@ -195,7 +203,7 @@ abstract class LeoRvAdapter<T : Any> : RecyclerView.Adapter<RecyclerView.ViewHol
      * @param helper 条目帮助类
      * @param data   对应数据
      */
-    protected abstract fun bindData(helper: ItemHelper, data: T)
+    protected abstract fun bindData(helper: ItemHelper, data: T, payloads: MutableList<Any>? = null)
 
     private val diffCallback = object : DiffUtil.ItemCallback<T>() {
 
@@ -225,8 +233,10 @@ abstract class LeoRvAdapter<T : Any> : RecyclerView.Adapter<RecyclerView.ViewHol
     }
 
     inner class ViewHolder internal constructor(parent: ViewGroup, layout: Int) :
-            RecyclerView.ViewHolder(LayoutInflater.from(parent.context)
-                    .inflate(layout, parent, false)),
+            RecyclerView.ViewHolder(
+                    LayoutInflater.from(parent.context)
+                            .inflate(layout, parent, false)
+            ),
             View.OnClickListener,
             View.OnLongClickListener {
         val itemHelper: ItemHelper = ItemHelper(this)
@@ -240,19 +250,19 @@ abstract class LeoRvAdapter<T : Any> : RecyclerView.Adapter<RecyclerView.ViewHol
         }
 
         var mPosition = 0
-        get() {
-            if (field != adapterPosition){
-                if (adapterPosition != NO_POSITION) {
-                    mPosition = adapterPosition
-                    return adapterPosition
+            get() {
+                if (field != adapterPosition) {
+                    if (adapterPosition != NO_POSITION) {
+                        mPosition = adapterPosition
+                        return adapterPosition
+                    }
                 }
+                return field
             }
-            return field
-        }
 
-        fun onBindViewHolder(position: Int) {
+        fun onBindViewHolder(position: Int, payloads: MutableList<Any>? = null) {
             mPosition = position
-            bindData(itemHelper, data[mPosition])
+            bindData(itemHelper, data[mPosition], payloads)
             loadMore(mPosition)
         }
 
@@ -275,13 +285,15 @@ abstract class LeoRvAdapter<T : Any> : RecyclerView.Adapter<RecyclerView.ViewHol
         if (::mOnLoadMoreListener.isInitialized &&
                 autoLoadMore &&
                 mLoadMoreCount != itemCount &&
-                position == itemCount - 1) {
+                position == itemCount - 1
+        ) {
             mLoadMoreCount = itemCount
             mOnLoadMoreListener(this@LeoRvAdapter, itemCount - 1)
         }
     }
 
-    class ItemHelper(private val viewHolder: LeoRvAdapter<out Any>.ViewHolder) : View.OnClickListener {
+    class ItemHelper(private val viewHolder: LeoRvAdapter<out Any>.ViewHolder) :
+            View.OnClickListener {
         private val viewCache = SparseArray<View>()
         private val clickListenerCache = ArrayList<Int>()
         private val mTags = HashMap<String, Any>()
@@ -291,7 +303,7 @@ abstract class LeoRvAdapter<T : Any> : RecyclerView.Adapter<RecyclerView.ViewHol
         @get:LayoutRes
         var itemLayoutResId: Int = 0
         val position
-        get() = viewHolder.mPosition
+            get() = viewHolder.mPosition
         val itemView: View = viewHolder.itemView
         val context: Context = itemView.context
         var tag: Any? = null
@@ -303,8 +315,10 @@ abstract class LeoRvAdapter<T : Any> : RecyclerView.Adapter<RecyclerView.ViewHol
             this.itemLayoutResId = layoutResId
         }
 
-        fun setOnItemChildClickListener(onItemChildClickListener:
-                                        (adapter: LeoRvAdapter<out Any>, v: View, position: Int) -> Unit) {
+        fun setOnItemChildClickListener(
+                onItemChildClickListener:
+                (adapter: LeoRvAdapter<out Any>, v: View, position: Int) -> Unit
+        ) {
             mOnItemChildClickListener = onItemChildClickListener
         }
 
@@ -518,7 +532,7 @@ abstract class LeoRvAdapter<T : Any> : RecyclerView.Adapter<RecyclerView.ViewHol
         fun addOnClickListener(@IdRes viewId: Int): ItemHelper {
             val contains = clickListenerCache.contains(viewId)
             if (!contains) {
-                getViewById<View>(viewId) { it.singleClick(this) }
+                getViewById<View>(viewId) { it.setOnClickListener(this) }
                 clickListenerCache.add(viewId)
             }
             return this
@@ -563,7 +577,7 @@ abstract class LeoRvAdapter<T : Any> : RecyclerView.Adapter<RecyclerView.ViewHol
          * @param helper 帮助类
          * @param item   数据
          */
-        abstract fun bindData(helper: ItemHelper, item: T)
+        abstract fun bindData(helper: ItemHelper, item: T, payloads: MutableList<Any>? = null)
 
         /**
          * 初始化view，只在view第一次创建调用
@@ -603,23 +617,31 @@ abstract class LeoRvAdapter<T : Any> : RecyclerView.Adapter<RecyclerView.ViewHol
     var autoLoadMore = true
     private var mLoadMoreCount = 0
 
-    fun setOnItemClickListener(onItemClickListener:
-                               (adapter: LeoRvAdapter<out Any>, v: View, position: Int) -> Unit) {
+    fun setOnItemClickListener(
+            onItemClickListener:
+            (adapter: LeoRvAdapter<out Any>, v: View, position: Int) -> Unit
+    ) {
         mOnItemClickListener = onItemClickListener
     }
 
-    fun setLoadMoreListener(onLoadMoreListener:
-                            (adapter: LeoRvAdapter<out Any>, lastItemPosition: Int) -> Unit) {
+    fun setLoadMoreListener(
+            onLoadMoreListener:
+            (adapter: LeoRvAdapter<out Any>, lastItemPosition: Int) -> Unit
+    ) {
         mOnLoadMoreListener = onLoadMoreListener
     }
 
-    fun setOnItemLongClickListener(onItemLongClickListener:
-                                   (adapter: LeoRvAdapter<out Any>, v: View, position: Int) -> Unit) {
+    fun setOnItemLongClickListener(
+            onItemLongClickListener:
+            (adapter: LeoRvAdapter<out Any>, v: View, position: Int) -> Unit
+    ) {
         mOnItemLongClickListener = onItemLongClickListener
     }
 
-    fun setOnItemChildClickListener(onItemChildClickListener:
-                                    (adapter: LeoRvAdapter<out Any>, v: View, position: Int) -> Unit) {
+    fun setOnItemChildClickListener(
+            onItemChildClickListener:
+            (adapter: LeoRvAdapter<out Any>, v: View, position: Int) -> Unit
+    ) {
         mOnItemChildClickListener = onItemChildClickListener
     }
 

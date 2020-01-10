@@ -26,20 +26,18 @@ import java.util.concurrent.Executors
 abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private var mAutoLoadMore = true
     private val mDiffer: AsyncListDiffer<T>
-    private lateinit var mOnLoadMoreListener:
-            (adapter: AsyncRvAdapterKt<out Any>, lastItemPosition: Int) -> Boolean
-    private lateinit var mOnItemClickListener:
-            (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int) -> Unit
-    private lateinit var mOnItemLongClickListener:
-            (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int) -> Unit
-    private lateinit var mOnItemChildClickListener:
-            (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int) -> Unit
+    private var mOnLoadMoreListener:
+            ((adapter: AsyncRvAdapterKt<out Any>, lastItemPosition: Int) -> Boolean)? = null
+    private var mOnItemClickListener:
+            ((adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int) -> Unit)? = null
+    private var mOnItemLongClickListener:
+            ((adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int) -> Unit)? = null
+    private var mOnItemChildClickListener:
+            ((adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int) -> Unit)? = null
     private val mOnItemChildClickListenerProxy:
             (adapter: AsyncRvAdapterKt<out Any>, v: View, position: Int) -> Unit =
             { adapter, v, position ->
-                if (::mOnItemChildClickListener.isInitialized) {
-                    mOnItemChildClickListener(adapter, v, position)
-                }
+                mOnItemChildClickListener?.invoke(adapter, v, position)
             }
 
     private val diffCallback = object : DiffUtil.ItemCallback<T>() {
@@ -68,12 +66,29 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
             asyncSubmitList(list)
         }
 
+
     /**
      * 编辑单个数据
      */
-    fun edit(position: Int, call: (t: T) -> Unit) {
-        call(getItem(position))
-        notifyItemChanged(position)
+    fun edit(position: Int, payload: Any? = null, call: (item: T) -> Unit) {
+        call(data[position])
+        notifyItemChanged(position, payload)
+    }
+
+    /**
+     * 编辑符合条件的数据
+     */
+    inline fun edit(
+            predicate: (position: Int, item: T) -> Boolean,
+            payload: Any? = null,
+            call: (position: Int, item: T) -> Unit
+    ) {
+        data.forEachIndexed { index, t ->
+            if (predicate(index, t)) {
+                call(index, t)
+                notifyItemChanged(index, payload)
+            }
+        }
     }
 
 
@@ -288,13 +303,6 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
         mOnItemChildClickListener = onItemChildClickListener
     }
 
-    private class MainThreadExecutor : Executor {
-        internal val mHandler = Handler(Looper.getMainLooper())
-
-        override fun execute(command: Runnable) {
-            mHandler.post(command)
-        }
-    }
 
     /**
      * 多条目类型防止 adapter臃肿，每个条目请继承此类
@@ -589,24 +597,30 @@ abstract class AsyncRvAdapterKt<T : Any> : RecyclerView.Adapter<RecyclerView.Vie
 
         fun setData() {
             bindData(itemHelper, getItem(adapterPosition))
-            if (::mOnLoadMoreListener.isInitialized && mAutoLoadMore && adapterPosition == itemCount - 1) {
-                mAutoLoadMore = mOnLoadMoreListener(
-                        this@AsyncRvAdapterKt, itemCount - 1)
+            if (mAutoLoadMore && adapterPosition == itemCount - 1) {
+                mAutoLoadMore = mOnLoadMoreListener?.invoke(
+                        this@AsyncRvAdapterKt, itemCount - 1) ?: false
             }
         }
 
         override fun onClick(v: View) {
-            if (::mOnItemClickListener.isInitialized) {
-                mOnItemClickListener(this@AsyncRvAdapterKt, v, adapterPosition)
-            }
+            mOnItemClickListener?.invoke(this@AsyncRvAdapterKt, v, adapterPosition)
         }
 
         override fun onLongClick(v: View): Boolean {
-            if (::mOnItemLongClickListener.isInitialized) {
-                mOnItemLongClickListener(this@AsyncRvAdapterKt, v, adapterPosition)
+            if (mOnItemLongClickListener != null) {
+                mOnItemLongClickListener?.invoke(this@AsyncRvAdapterKt, v, adapterPosition)
                 return true
             }
             return false
+        }
+    }
+
+    private class MainThreadExecutor : Executor {
+        internal val mHandler = Handler(Looper.getMainLooper())
+
+        override fun execute(command: Runnable) {
+            mHandler.post(command)
         }
     }
 
